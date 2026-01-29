@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bustan Nabiel Maulana | Portfolio</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;700;800&display=swap"
+        rel="stylesheet">
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <!-- Custom Cursor -->
+    <div class="cursor-dot"></div>
+    <div class="cursor-outline"></div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">Bustan<span>.</span></a>
+
+            <button class="menu-toggle"><i class="fa-solid fa-bars"></i></button>
+
+            <ul class="nav-links">
+                <li><a href="index.html" class="nav-link active">Home</a></li>
+                <li><a href="experience.html" class="nav-link">Experience</a></li>
+                <li><a href="projects.html" class="nav-link">Projects</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Header / Hero -->
+    <header>
+        <div class="container hero-content">
+            <!-- Tempat Foto Profil -->
+            <img src="images/foto_profil.jpg" alt="Foto Profil" class="profile-img"
+                onerror="this.src='https://via.placeholder.com/180/1e293b/38bdf8?text=Foto+Anda'">
+
+            <p
+                style="color: var(--accent); font-weight: 600; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 2px;">
+                Portfolio</p>
+            <h1>Hallo, Saya <br><span class="highlight">Bustan Nabiel Maulana</span></h1>
+            <p class="subtitle" style="font-size: 1.25rem;">Mahasiswa S1 Teknik Elektro, Universitas Telkom Bandung</p>
+
+            <div class="social-links">
+                <a href="https://linkedin.com/in/bustannabiel" target="_blank" title="LinkedIn"><i
+                        class="fa-brands fa-linkedin"></i></a>
+                <a href="https://bustanmln.github.io" target="_blank" title="GitHub"><i
+                        class="fa-brands fa-github"></i></a>
+                <a href="mailto:bustannabiel@student.telkomuniversity.ac.id" title="Email"><i
+                        class="fa-solid fa-envelope"></i></a>
+                <a href="https://wa.me/6281216919968" title="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+            </div>
+
+            <a href="#about" class="btn">Lihat Profil <i class="fa-solid fa-arrow-down"
+                    style="margin-left: 8px;"></i></a>
+        </div>
+    </header>
+
+    <div class="container">
+
+        <!-- About -->
+        <section id="about">
+            <h2><i class="fa-solid fa-user" style="margin-right: 15px; color: var(--accent);"></i>Tentang Saya</h2>
+            <p style="font-size: 1.05rem; text-align: justify;">
+                Saya adalah Bustan Nabiel Maulana, seorang mahasiswa program Sarjana (S1) Teknik Elektro di Universitas
+                Telkom.
+                Saya memiliki kompetensi teknis yang solid di bidang Pemrograman Bahasa C, Internet of Things (IoT),
+                Mikrokomputer, dan Perangkat Keras Komputer.
+                Pengalaman praktis saya diperkaya melalui peran aktif sebagai asisten praktikum laboratorium dan
+                pemateri dalam berbagai lokakarya mengenai pemrograman dan IoT.
+                Keterlibatan dalam berbagai kegiatan kampus dan pengabdian masyarakat telah membentuk saya menjadi
+                pribadi yang mandiri, andal, dan memiliki kapabilitas kepemimpinan dalam proyek-proyek teknis.
+                Saya memiliki minat mendalam dan antusiasme tinggi untuk berkontribusi pada perkembangan teknologi dan
+                industri di masa depan.
+            </p>
+        </section>
+
+        <!-- Education -->
+        <section id="education">
+            <h2><i class="fa-solid fa-graduation-cap" style="margin-right: 15px; color: var(--accent);"></i>Pendidikan
+            </h2>
+            <div class="list-card">
+                <div class="education-item">
+                    <strong>Telkom University Bandung</strong>
+                    <span>S1 Teknik Elektro</span>
+                </div>
+                <div class="education-item">
+                    <strong>SMAN 4 Tuban</strong>
+                    <span>MIPA</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Skills -->
+        <section id="skills">
+            <h2><i class="fa-solid fa-code" style="margin-right: 15px; color: var(--accent);"></i>Bidang Keahlian</h2>
+            <div class="skills-grid">
+                <div class="skill-item">C Programming</div>
+                <div class="skill-item">Python Programming</div>
+                <div class="skill-item">Sphinx Documentation</div>
+                <div class="skill-item">Hardware Spesialis</div>
+                <div class="skill-item">Microsoft Office & 365</div>
+                <div class="skill-item">Arduino IDE</div>
+                <div class="skill-item">Visual Studio Code</div>
+                <div class="skill-item">Pycharm Community</div>
+            </div>
+        </section>
+
+        <!-- Achievements -->
+        <section id="achievements">
+            <h2><i class="fa-solid fa-trophy" style="margin-right: 15px; color: var(--accent);"></i>Prestasi &
+                Penghargaan</h2>
+            <div class="list-card">
+                <ul>
+                    <li style="margin-bottom: 10px;">
+                        <i class="fa-solid fa-medal" style="color: gold; margin-right: 10px;"></i>
+                        <strong>Top 30 Project Report NCIA</strong> (Novo Club In Action by ParagonCorp), Indonesia
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Certificates -->
+        <section id="certificates">
+            <h2><i class="fa-solid fa-certificate" style="margin-right: 15px; color: var(--accent);"></i>Sertifikat</h2>
+            <div class="list-card">
+                <ul>
+                    <li style="margin-bottom: 10px;"><i class="fa-solid fa-check-circle"
+                            style="color: var(--accent); margin-right: 10px;"></i> Python Course (Gold) - Skilvul</li>
+                    <li><i class="fa-solid fa-check-circle" style="color: var(--accent); margin-right: 10px;"></i>
+                        Pemrograman Bahasa C - Dicoding</li>
+                </ul>
+            </div>
+        </section>
+
+        <footer>
+            <p>&copy; 2026 Bustan Nabiel Maulana. <br>Designed & Built with <i class="fa-solid fa-heart"
+                    style="color: var(--accent);"></i></p>
+        </footer>
+
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/main.js"></script>
+
+</body>
+
+</html>
