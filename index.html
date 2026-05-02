@@ -1,32 +1,24 @@
 <!DOCTYPE html>
-<html lang="id">
-
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bustan Nabiel Maulana | Portfolio</title>
+    <title>Bustan Nabiel | Portfolio</title>
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;700;800&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
     <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="css/style.css">
 </head>
-
 <body>
-
-    <!-- Custom Cursor -->
-    <div class="cursor-dot"></div>
-    <div class="cursor-outline"></div>
 
     <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-container">
-            <a href="index.html" class="logo">Bustan<span>.</span></a>
+            <a href="index.html" class="logo">Bustan<span style="color: var(--text-main)">Nabiel</span></a>
 
             <button class="menu-toggle"><i class="fa-solid fa-bars"></i></button>
 
@@ -35,117 +27,314 @@
                 <li><a href="experience.html" class="nav-link">Experience</a></li>
                 <li><a href="projects.html" class="nav-link">Projects</a></li>
             </ul>
+
         </div>
     </nav>
 
     <!-- Header / Hero -->
-    <header>
-        <div class="container hero-content">
-            <!-- Tempat Foto Profil -->
-            <img src="images/foto_profil.jpg" alt="Foto Profil" class="profile-img"
-                onerror="this.src='https://via.placeholder.com/180/1e293b/38bdf8?text=Foto+Anda'">
+    <header class="container hero">
+        <img src="images/profile/foto_profil.jpg" alt="Foto Profil" class="profile-img"
+            onerror="this.src='https://via.placeholder.com/180/1e293b/38bdf8?text=Foto+Anda'">
 
-            <p
-                style="color: var(--accent); font-weight: 600; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 2px;">
-                Portfolio</p>
-            <h1>Hallo, Saya <br><span class="highlight">Bustan Nabiel Maulana</span></h1>
-            <p class="subtitle" style="font-size: 1.25rem;">Mahasiswa S1 Teknik Elektro, Universitas Telkom Bandung</p>
-
-            <div class="social-links">
-                <a href="https://linkedin.com/in/bustannabiel" target="_blank" title="LinkedIn"><i
-                        class="fa-brands fa-linkedin"></i></a>
-                <a href="https://bustanmln.github.io" target="_blank" title="GitHub"><i
-                        class="fa-brands fa-github"></i></a>
-                <a href="mailto:bustannabiel@student.telkomuniversity.ac.id" title="Email"><i
-                        class="fa-solid fa-envelope"></i></a>
-                <a href="https://wa.me/6281216919968" title="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+        <h1 class="hero-name" style="margin-bottom: 5px;">Hallo, Saya <span class="highlight animated-gradient-text">Bustan Nabiel Maulana</span></h1>
+        
+        <div class="role-scroller">
+            <span class="static-text">A passionate</span>
+            <div class="scrolling-words-wrapper">
+                <ul class="scrolling-words">
+                    <li class="role-orange">Electrical Engineer.</li>
+                    <li class="role-blue">UI/UX Designer.</li>
+                    <li class="role-green">IoT Developer.</li>
+                    <li class="role-orange">Electrical Engineer.</li>
+                </ul>
             </div>
+        </div>
+        
+        <p class="subtitle">
+            An Electrical Engineering student passionate about bridging the gap between hardware precision and digital creativity. Based in Indonesia, crafting optimistic experiences through code and circuits.
+        </p>
 
-            <a href="#about" class="btn">Lihat Profil <i class="fa-solid fa-arrow-down"
-                    style="margin-left: 8px;"></i></a>
+        <div class="social-links-hero">
+            <a href="https://linkedin.com/in/bustannabiel" target="_blank"><i class="fa-brands fa-linkedin"></i></a>
+            <a href="https://bustanmln.github.io" target="_blank"><i class="fa-brands fa-github"></i></a>
+            <a href="https://wa.me/6281216919968" target="_blank"><i class="fa-brands fa-whatsapp"></i></a>
+            <a href="https://instagram.com/bustanmln" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+        </div>
+
+        <div class="hero-actions">
+            <a href="projects.html" class="btn-brown">View My Projects</a>
+            <a href="#" class="btn-blue"><i class="fa-solid fa-file-pdf"></i> Download CV</a>
         </div>
     </header>
 
+    <!-- Academic Journey -->
+    <section id="academic-journey" style="margin-top: 100px; margin-bottom: 80px; overflow: hidden; width: 100vw; margin-left: calc(-50vw + 50%);">
+        <div class="container">
+            <h2 style="font-size: 2.2rem; font-weight: 700; margin-bottom: 5px; color: var(--accent-brown);">Academic Journey</h2>
+            <p style="margin-bottom: 40px; color: var(--text-muted);">The foundations of my creative and technical perspective.</p>
+        </div>
+        
+        <div class="academic-slider">
+            <div class="academic-track">
+                <!-- Group 1 -->
+                <div class="academic-card wide">
+                    <div class="ac-content">
+                        <div class="ac-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+                        <h3 class="ac-title">Telkom University</h3>
+                        <div class="ac-subtitle">Higher Education • Bandung</div>
+                        <p class="ac-desc">Immersed in a world of innovation. I specialized in digital solutions and user-centric design. This environment sharpened my ability to blend technical constraints with creative freedom, learning to build bridges between ideas and reality.</p>
+                        <div class="ac-tags">
+                            <span>UX Design</span>
+                            <span>Product Development</span>
+                            <span>Research</span>
+                        </div>
+                    </div>
+                    <div class="ac-image">
+                        <img src="https://via.placeholder.com/400x400/1e293b/38bdf8?text=Telkom+Univ" alt="Telkom Univ">
+                    </div>
+                </div>
+
+                <div class="academic-card">
+                    <div class="ac-content">
+                        <div class="ac-icon"><i class="fa-solid fa-school"></i></div>
+                        <h3 class="ac-title">SMAN 4 Tuban</h3>
+                        <div class="ac-subtitle">Senior High School • Tuban</div>
+                        <p class="ac-desc">Where it all began. My time in Tuban fostered my initial curiosity for technology and its potential to solve problems.</p>
+                        <div class="ac-tags">
+                            <span>Science</span>
+                            <span>Mathematics</span>
+                        </div>
+                    </div>
+                    <div class="ac-image">
+                        <img src="https://via.placeholder.com/400x200/1e293b/818cf8?text=SMAN+4" alt="SMAN 4">
+                    </div>
+                </div>
+
+                <div class="academic-card">
+                    <div class="ac-content">
+                        <div class="ac-icon"><i class="fa-solid fa-book-open"></i></div>
+                        <h3 class="ac-title">SMPIT Al Uswah Tuban</h3>
+                        <div class="ac-subtitle">Junior High School • Tuban</div>
+                        <p class="ac-desc">Building strong foundational character and logical thinking. This period was crucial in shaping my work ethic and teaching me the value of discipline and continuous learning.</p>
+                        <div class="ac-tags">
+                            <span>Basic Logic</span>
+                            <span>Character Building</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="academic-card wide">
+                    <div class="ac-content">
+                        <div class="ac-icon"><i class="fa-solid fa-pencil"></i></div>
+                        <h3 class="ac-title">SDIT Al Uswah Tuban</h3>
+                        <div class="ac-subtitle">Elementary School • Tuban</div>
+                        <p class="ac-desc">The start of my educational journey, introducing me to the joy of discovery and the importance of perseverance. Here I first learned to dream big and work hard.</p>
+                        <div class="ac-tags">
+                            <span>Foundations</span>
+                            <span>Curiosity</span>
+                        </div>
+                    </div>
+                    <div class="ac-image">
+                        <img src="https://via.placeholder.com/400x400/1e293b/38bdf8?text=SDIT" alt="SDIT">
+                    </div>
+                </div>
+
+                <!-- Group 2 (Duplicate for Infinite Loop) -->
+                <div class="academic-card wide">
+                    <div class="ac-content">
+                        <div class="ac-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+                        <h3 class="ac-title">Telkom University</h3>
+                        <div class="ac-subtitle">Higher Education • Bandung</div>
+                        <p class="ac-desc">Immersed in a world of innovation. I specialized in digital solutions and user-centric design. This environment sharpened my ability to blend technical constraints with creative freedom, learning to build bridges between ideas and reality.</p>
+                        <div class="ac-tags">
+                            <span>UX Design</span>
+                            <span>Product Development</span>
+                            <span>Research</span>
+                        </div>
+                    </div>
+                    <div class="ac-image">
+                        <img src="https://via.placeholder.com/400x400/1e293b/38bdf8?text=Telkom+Univ" alt="Telkom Univ">
+                    </div>
+                </div>
+
+                <div class="academic-card">
+                    <div class="ac-content">
+                        <div class="ac-icon"><i class="fa-solid fa-school"></i></div>
+                        <h3 class="ac-title">SMAN 4 Tuban</h3>
+                        <div class="ac-subtitle">Senior High School • Tuban</div>
+                        <p class="ac-desc">Where it all began. My time in Tuban fostered my initial curiosity for technology and its potential to solve problems.</p>
+                        <div class="ac-tags">
+                            <span>Science</span>
+                            <span>Mathematics</span>
+                        </div>
+                    </div>
+                    <div class="ac-image">
+                        <img src="https://via.placeholder.com/400x200/1e293b/818cf8?text=SMAN+4" alt="SMAN 4">
+                    </div>
+                </div>
+
+                <div class="academic-card">
+                    <div class="ac-content">
+                        <div class="ac-icon"><i class="fa-solid fa-book-open"></i></div>
+                        <h3 class="ac-title">SMPIT Al Uswah Tuban</h3>
+                        <div class="ac-subtitle">Junior High School • Tuban</div>
+                        <p class="ac-desc">Building strong foundational character and logical thinking. This period was crucial in shaping my work ethic and teaching me the value of discipline and continuous learning.</p>
+                        <div class="ac-tags">
+                            <span>Basic Logic</span>
+                            <span>Character Building</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="academic-card wide">
+                    <div class="ac-content">
+                        <div class="ac-icon"><i class="fa-solid fa-pencil"></i></div>
+                        <h3 class="ac-title">SDIT Al Uswah Tuban</h3>
+                        <div class="ac-subtitle">Elementary School • Tuban</div>
+                        <p class="ac-desc">The start of my educational journey, introducing me to the joy of discovery and the importance of perseverance. Here I first learned to dream big and work hard.</p>
+                        <div class="ac-tags">
+                            <span>Foundations</span>
+                            <span>Curiosity</span>
+                        </div>
+                    </div>
+                    <div class="ac-image">
+                        <img src="https://via.placeholder.com/400x400/1e293b/38bdf8?text=SDIT" alt="SDIT">
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
     <div class="container">
-
-        <!-- About -->
-        <section id="about">
-            <h2><i class="fa-solid fa-user" style="margin-right: 15px; color: var(--accent);"></i>Tentang Saya</h2>
-            <p style="font-size: 1.05rem; text-align: justify;">
-                Saya adalah Bustan Nabiel Maulana, seorang mahasiswa program Sarjana (S1) Teknik Elektro di Universitas
-                Telkom.
-                Saya memiliki kompetensi teknis yang solid di bidang Pemrograman Bahasa C, Internet of Things (IoT),
-                Mikrokomputer, dan Perangkat Keras Komputer.
-                Pengalaman praktis saya diperkaya melalui peran aktif sebagai asisten praktikum laboratorium dan
-                pemateri dalam berbagai lokakarya mengenai pemrograman dan IoT.
-                Keterlibatan dalam berbagai kegiatan kampus dan pengabdian masyarakat telah membentuk saya menjadi
-                pribadi yang mandiri, andal, dan memiliki kapabilitas kepemimpinan dalam proyek-proyek teknis.
-                Saya memiliki minat mendalam dan antusiasme tinggi untuk berkontribusi pada perkembangan teknologi dan
-                industri di masa depan.
-            </p>
-        </section>
-
-        <!-- Education -->
-        <section id="education">
-            <h2><i class="fa-solid fa-graduation-cap" style="margin-right: 15px; color: var(--accent);"></i>Pendidikan
-            </h2>
-            <div class="list-card">
-                <div class="education-item">
-                    <strong>Telkom University Bandung</strong>
-                    <span>S1 Teknik Elektro</span>
+        
+        <!-- Selected Works -->
+        <!-- Mastery & Credentials -->
+        <section id="mastery" style="margin-top: 100px; margin-bottom: 80px;">
+            <div class="section-header" style="text-align: center; flex-direction: column; align-items: center; margin-bottom: 60px;">
+                <div class="pill-green" style="margin-bottom: 15px; display: inline-flex; align-items: center; gap: 8px; background: #D1FAE5; color: #059669; padding: 6px 16px; border-radius: 999px; font-weight: 600; font-size: 0.9rem;">
+                    <i class="fa-solid fa-check-circle"></i> Verified Expertise
                 </div>
-                <div class="education-item">
-                    <strong>SMAN 4 Tuban</strong>
-                    <span>MIPA</span>
+                <h2 style="font-size: 2.8rem; font-weight: 700; color: var(--accent-brown); margin-bottom: 15px;">Mastery & Credentials</h2>
+                <p style="max-width: 600px; margin: 0 auto; color: var(--text-muted);">A cheerful collection of the technical skills, creative tools, and professional milestones that define my journey in building human-centric solutions.</p>
+            </div>
+
+            <div class="bento-grid">
+                
+                <!-- Programming -> Bidang Keahlian (Top Left, Wide) -->
+                <div class="bento-card span-3" style="background: #F3EAD8;">
+                    <div class="bento-header">
+                        <div class="bento-icon orange"><i class="fa-solid fa-code"></i></div>
+                        <h3>Bidang Keahlian</h3>
+                    </div>
+                    <div class="bento-tags">
+                        <span class="bento-tag"><i class="fa-solid fa-c"></i> C Programming</span>
+                        <span class="bento-tag"><i class="fa-brands fa-python"></i> Python Programming</span>
+                        <span class="bento-tag"><i class="fa-solid fa-book"></i> Sphinx Documentation</span>
+                        <span class="bento-tag"><i class="fa-solid fa-microchip"></i> Hardware Spesialis</span>
+                        <span class="bento-tag"><i class="fa-brands fa-microsoft"></i> Microsoft Office & 365</span>
+                        <span class="bento-tag"><i class="fa-solid fa-infinity"></i> Arduino IDE</span>
+                        <span class="bento-tag"><i class="fa-solid fa-code"></i> Visual Studio Code</span>
+                        <span class="bento-tag"><i class="fa-brands fa-python"></i> Pycharm Community</span>
+                        <span class="bento-tag"><i class="fa-brands fa-android"></i> Android Studio</span>
+                        <span class="bento-tag"><i class="fa-solid fa-wifi"></i> IoT</span>
+                        <span class="bento-tag"><i class="fa-solid fa-cloud"></i> IoT Platform</span>
+                        <span class="bento-tag"><i class="fa-solid fa-server"></i> PLC (Programming Logic Control)</span>
+                    </div>
                 </div>
+
+                <!-- Hardware (Top Right, Narrow) -->
+                <div class="bento-card span-2" style="background: #E8F4F8;">
+                    <div class="bento-header">
+                        <div class="bento-icon blue"><i class="fa-solid fa-microchip"></i></div>
+                        <h3>Hardware</h3>
+                    </div>
+                    <ul class="bento-list">
+                        <li><i class="fa-solid fa-satellite-dish"></i> IoT Prototyping</li>
+                        <li><i class="fa-solid fa-microchip"></i> Circuit Design</li>
+                        <li><i class="fa-solid fa-network-wired"></i> Network Infrastructure</li>
+                        <li><i class="fa-solid fa-robot"></i> Embedded Systems</li>
+                    </ul>
+                    <div class="bento-image-container">
+                        <img src="images/experience/korlog2.jpg" alt="Hardware Projects" onerror="this.src='https://via.placeholder.com/400x200/1e293b/38bdf8?text=Hardware+Projects'">
+                    </div>
+                </div>
+
+                <!-- Certifications (Bottom Left, Narrow) -->
+                <div class="bento-card span-2" style="background: #E8F5E9;">
+                    <div class="bento-header">
+                        <div class="bento-icon green"><i class="fa-solid fa-certificate"></i></div>
+                        <h3>Sertifikat</h3>
+                    </div>
+                    <div class="bento-cert-list">
+                        <div class="bento-cert">
+                            <div>
+                                <h4>Python Course (Gold)</h4>
+                                <p>Skilvul (Hingga Mar 2026)</p>
+                            </div>
+                            <span class="cert-year">Mar 2024</span>
+                        </div>
+                        <div class="bento-cert">
+                            <div>
+                                <h4>Pemrograman Bahasa C</h4>
+                                <p>Dicoding (Hingga Jul 2027)</p>
+                            </div>
+                            <span class="cert-year">Jul 2024</span>
+                        </div>
+                        <div class="bento-cert">
+                            <div>
+                                <h4>Oracle Certified Foundations Associate</h4>
+                                <p>Oracle</p>
+                            </div>
+                        </div>
+                        <div class="bento-cert">
+                            <div>
+                                <h4>Short Class UI/UX Research & Design</h4>
+                                <p>MySkill</p>
+                            </div>
+                            <span class="cert-year">Des 2023</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Awards & Recognition (Bottom Right, Wide) -->
+                <div class="bento-card span-3" style="background: #F3EAD8;">
+                    <div class="bento-header">
+                        <div class="bento-icon orange"><i class="fa-solid fa-trophy"></i></div>
+                        <h3>Prestasi & Penghargaan</h3>
+                    </div>
+                    <div class="bento-award-featured" style="margin-top: auto; height: 100%; display: flex; flex-direction: column; justify-content: center;">
+                        <div style="display: flex; gap: 20px; align-items: flex-start;">
+                            <div class="featured-icon"><i class="fa-solid fa-star"></i></div>
+                            <div>
+                                <h4 style="font-size: 1.3rem;">Top 30 Project Report NCIA</h4>
+                                <p class="award-subtitle">Novo Club In Action by ParagonCorp, Indonesia</p>
+                                <p class="award-desc">Berhasil meraih peringkat 30 besar dalam kompetisi laporan proyek tingkat nasional yang diselenggarakan oleh ParagonCorp.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
+
+            <!-- New CTA Section matching the image -->
+            <div class="bento-cta">
+                <h2>Always Learning, Always Growing</h2>
+                <p>I believe that every project is an opportunity to master something new.<br>Currently diving deep into <strong>Web3 Architectures</strong> and <strong>Motion Design</strong>.</p>
+            </div>
+
         </section>
 
-        <!-- Skills -->
-        <section id="skills">
-            <h2><i class="fa-solid fa-code" style="margin-right: 15px; color: var(--accent);"></i>Bidang Keahlian</h2>
-            <div class="skills-grid">
-                <div class="skill-item">C Programming</div>
-                <div class="skill-item">Python Programming</div>
-                <div class="skill-item">Sphinx Documentation</div>
-                <div class="skill-item">Hardware Spesialis</div>
-                <div class="skill-item">Microsoft Office & 365</div>
-                <div class="skill-item">Arduino IDE</div>
-                <div class="skill-item">Visual Studio Code</div>
-                <div class="skill-item">Pycharm Community</div>
-            </div>
-        </section>
-
-        <!-- Achievements -->
-        <section id="achievements">
-            <h2><i class="fa-solid fa-trophy" style="margin-right: 15px; color: var(--accent);"></i>Prestasi &
-                Penghargaan</h2>
-            <div class="list-card">
-                <ul>
-                    <li style="margin-bottom: 10px;">
-                        <i class="fa-solid fa-medal" style="color: gold; margin-right: 10px;"></i>
-                        <strong>Top 30 Project Report NCIA</strong> (Novo Club In Action by ParagonCorp), Indonesia
-                    </li>
-                </ul>
-            </div>
-        </section>
-
-        <!-- Certificates -->
-        <section id="certificates">
-            <h2><i class="fa-solid fa-certificate" style="margin-right: 15px; color: var(--accent);"></i>Sertifikat</h2>
-            <div class="list-card">
-                <ul>
-                    <li style="margin-bottom: 10px;"><i class="fa-solid fa-check-circle"
-                            style="color: var(--accent); margin-right: 10px;"></i> Python Course (Gold) - Skilvul</li>
-                    <li><i class="fa-solid fa-check-circle" style="color: var(--accent); margin-right: 10px;"></i>
-                        Pemrograman Bahasa C - Dicoding</li>
-                </ul>
-            </div>
-        </section>
-
+        <!-- Footer -->
         <footer>
-            <p>&copy; 2026 Bustan Nabiel Maulana. <br>Designed & Built with <i class="fa-solid fa-heart"
-                    style="color: var(--accent);"></i></p>
+            <div class="footer-left">
+                <span class="logo" style="color: var(--accent); font-weight: 700; letter-spacing: -0.5px;">Bustan Nabiel</span>
+                <p>&copy; 2024 Bustan Nabiel. Made with warmth and optimism.</p>
+            </div>
+            
+
+
+
         </footer>
 
     </div>
@@ -154,5 +343,4 @@
     <script src="js/main.js"></script>
 
 </body>
-
 </html>
