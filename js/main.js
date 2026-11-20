@@ -1,10 +1,9 @@
 /* ==========================================================================
-   Bustan Nabiel Maulana — Multi-Layer SPA Portfolio Controller (Bilingual ID/EN)
-   - Hash-based SPA View Switching (#home, #experience, #projects, #certificates, #contact)
-   - Live ID/EN i18n without reload or layer/modal reset (persistent via localStorage)
-   - Interactive Master-Detail Experience & Projects + Multi-Photo Lightbox
-   - Interactive Certificates Filter & Next/Prev Lightbox Modal
-   - Official Contact Actions with Copy-to-Clipboard
+   Bustan Nabiel Maulana — Full-Width Multi-Layer Portfolio Controller (ID/EN)
+   - Hash-based Multi-Layer SPA (#home, #experience, #projects, #certificates, #contact)
+   - Sliding Desktop Nav Indicator + Staggered Layer Reveal + Cursor Spotlight
+   - Live ID/EN i18n without reload or layer/modal reset (localStorage persisted)
+   - Full-Width Bento Projects + Master-Detail Experience + Interactive Certificates
    ========================================================================== */
 
 (function () {
@@ -14,6 +13,9 @@
   const EXPERIENCES = I18N.experiences;
   const PROJECTS = I18N.projects;
   const CERTIFICATES = I18N.certificates;
+
+  const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const hasFinePointer = window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 
   /* ------------------------------------------------------------------------
      Icons (Crisp Inline SVGs — Zero Emoji)
@@ -28,7 +30,7 @@
   };
 
   /* ------------------------------------------------------------------------
-     Utility & Localization Helpers
+     Localization & Utility Helpers
      ------------------------------------------------------------------------ */
   const LANG_KEY = 'bustan-lang-preference';
   let currentLang = 'en';
@@ -96,19 +98,19 @@
       try { localStorage.setItem(LANG_KEY, currentLang); } catch (_) {}
     }
 
-    // Update all static UI text & <html lang> WITHOUT changing active layer or scroll
+    // Translate static & dynamic UI in-place WITHOUT changing active layer or scroll
     applyStaticTranslations();
-
-    // Re-render dynamic datasets while preserving exact selected items, photo indices & filters
     renderExperienceView();
     renderProjectsView();
     renderCertificatesView();
 
-    // If Lightbox modal is currently open, refresh its localized content in-place
     const lbModal = document.getElementById('lightbox-modal');
     if (lbModal && lbModal.classList.contains('open')) {
       renderLightboxFrame();
     }
+
+    // Re-align sliding nav indicator after label width changes (e.g., Projects -> Proyek)
+    requestAnimationFrame(updateNavSlider);
   }
 
   function copyToClipboard(text, btnEl) {
@@ -138,6 +140,26 @@
     try { document.execCommand('copy'); } catch (_) {}
     document.body.removeChild(ta);
     cb();
+  }
+
+  /* ------------------------------------------------------------------------
+     Sliding Desktop Nav Indicator
+     ------------------------------------------------------------------------ */
+  function updateNavSlider() {
+    const shell = document.getElementById('desktop-nav-shell');
+    const slider = document.getElementById('nav-slider');
+    if (!shell || !slider) return;
+    const activeLink = shell.querySelector('.nav-item.active');
+    if (!activeLink || shell.offsetParent === null) {
+      slider.style.opacity = '0';
+      return;
+    }
+    const shellRect = shell.getBoundingClientRect();
+    const linkRect = activeLink.getBoundingClientRect();
+    const x = linkRect.left - shellRect.left;
+    slider.style.width = linkRect.width + 'px';
+    slider.style.transform = 'translate3d(' + x + 'px, 0, 0)';
+    slider.style.opacity = '1';
   }
 
   /* ------------------------------------------------------------------------
@@ -178,6 +200,7 @@
     }
 
     window.scrollTo({ top: 0, behavior: 'instant' });
+    requestAnimationFrame(updateNavSlider);
   }
 
   /* ------------------------------------------------------------------------
@@ -216,7 +239,7 @@
   }
 
   /* ------------------------------------------------------------------------
-     Experience Master-Detail Controller
+     Experience Master-Detail Controller (Full-Width Split)
      ------------------------------------------------------------------------ */
   const expState = {
     filter: 'all',
@@ -250,7 +273,7 @@
     listEl.innerHTML = filtered.map(function (e) {
       const isAct = e.id === active.id;
       return (
-        '<button type="button" class="dir-card' + (isAct ? ' active' : '') + '" data-select-exp="' + e.id + '">' +
+        '<button type="button" class="dir-card interactive-card' + (isAct ? ' active' : '') + '" data-select-exp="' + e.id + '">' +
           '<div class="dir-thumb"><img src="' + safeAttrUrl(e.photos[0].src) + '" alt="' + escapeHtml(pick(e.role)) + '" loading="lazy" /></div>' +
           '<div class="dir-meta">' +
             '<div class="dir-top"><span class="dir-code">' + e.code + '</span><span>' + escapeHtml(pick(e.period)) + '</span></div>' +
@@ -268,7 +291,7 @@
     const bullets = pick(active.bullets);
 
     detailEl.innerHTML =
-      '<div class="detail-sheet">' +
+      '<div class="detail-sheet detail-sheet-wide">' +
         '<div class="media-showcase">' +
           '<div class="media-stage">' +
             (active.photos.length > 1
@@ -314,7 +337,7 @@
   }
 
   /* ------------------------------------------------------------------------
-     Projects Master-Detail Controller
+     Projects Bento Overview + Full-Width Technical Blueprint Controller
      ------------------------------------------------------------------------ */
   const prjState = {
     filter: 'all',
@@ -328,9 +351,9 @@
   }
 
   function renderProjectsView() {
-    const listEl = document.getElementById('prj-directory');
+    const bentoEl = document.getElementById('prj-bento');
     const detailEl = document.getElementById('prj-detail');
-    if (!listEl || !detailEl) return;
+    if (!bentoEl || !detailEl) return;
 
     const filtered = getFilteredProjects();
     if (!filtered.some(function (p) { return p.id === prjState.selectedId; })) {
@@ -345,22 +368,28 @@
     const currentPhoto = active.photos[prjState.photoIdx];
     const photosWord = t('common.photos');
 
-    listEl.innerHTML = filtered.map(function (p) {
+    bentoEl.innerHTML = filtered.map(function (p) {
       const isAct = p.id === active.id;
       return (
-        '<button type="button" class="dir-card' + (isAct ? ' active' : '') + '" data-select-prj="' + p.id + '">' +
-          '<div class="dir-thumb"><img src="' + safeAttrUrl(p.photos[0].src) + '" alt="' + escapeHtml(p.title) + '" loading="lazy" /></div>' +
-          '<div class="dir-meta">' +
-            '<div class="dir-top"><span class="dir-code">' + p.code + '</span><span>' + escapeHtml(pick(p.period)) + '</span></div>' +
-            '<div class="dir-title">' + escapeHtml(p.title) + '</div>' +
-            '<div class="dir-sub">' + escapeHtml(pick(p.categoryLabel)) + ' · ' + p.photos.length + ' ' + escapeHtml(photosWord) + '</div>' +
+        '<button type="button" class="bento-prj-card interactive-card' + (isAct ? ' active' : '') + '" data-select-prj="' + p.id + '">' +
+          '<div class="bento-prj-thumb">' +
+            '<img src="' + safeAttrUrl(p.photos[0].src) + '" alt="' + escapeHtml(p.title) + '" loading="lazy" />' +
+            '<span class="bento-prj-badge">' + p.code + '</span>' +
+            '<span class="bento-prj-count">' + p.photos.length + ' ' + escapeHtml(photosWord) + '</span>' +
+          '</div>' +
+          '<div class="bento-prj-body">' +
+            '<span class="bento-prj-cat">' + escapeHtml(pick(p.categoryLabel)) + '</span>' +
+            '<h3 class="bento-prj-title">' + escapeHtml(p.title) + '</h3>' +
+            '<div class="tag-list" style="margin-top:auto; padding-top:0.35rem;">' +
+              p.stack.slice(0, 3).map(function (s) { return '<span class="tag">' + escapeHtml(s) + '</span>'; }).join('') +
+            '</div>' +
           '</div>' +
         '</button>'
       );
     }).join('');
 
     detailEl.innerHTML =
-      '<div class="detail-sheet">' +
+      '<div class="detail-sheet detail-sheet-wide">' +
         '<div class="media-showcase">' +
           '<div class="media-stage">' +
             (active.photos.length > 1
@@ -413,7 +442,7 @@
   }
 
   /* ------------------------------------------------------------------------
-     Interactive Certificates Registry Controller
+     Interactive Certificates Bento Registry (Featured Banner + 4-Col Grid)
      ------------------------------------------------------------------------ */
   let certFilter = 'all';
 
@@ -429,6 +458,7 @@
     const list = getFilteredCertificates();
     const hoverLabel = t('cert.hover');
     const viewLabel = t('cert.view');
+    const featuredLabel = t('cert.featured');
 
     gridEl.innerHTML = list.map(function (c, idx) {
       const title = pick(c.title);
@@ -436,16 +466,20 @@
       const date = pick(c.date);
       const tag = pick(c.tag);
       const desc = pick(c.desc);
+      const isFeatured = certFilter === 'all' && idx === 0;
 
       return (
-        '<button type="button" class="cert-card" data-open-cert-idx="' + idx + '" aria-label="' + escapeHtml(hoverLabel + ': ' + title) + '">' +
+        '<button type="button" class="cert-card interactive-card' + (isFeatured ? ' featured-cert' : '') + '" data-open-cert-idx="' + idx + '" aria-label="' + escapeHtml(hoverLabel + ': ' + title) + '">' +
           '<div class="cert-frame">' +
             '<img src="' + safeAttrUrl(c.image) + '" alt="' + escapeHtml(title) + '" loading="lazy" />' +
             '<span class="cert-hover-pill">' + escapeHtml(hoverLabel) + '</span>' +
           '</div>' +
           '<div class="cert-body">' +
             '<div class="cert-meta-row">' +
-              '<span class="tag">' + escapeHtml(tag) + '</span>' +
+              '<div class="tag-list">' +
+                (isFeatured ? '<span class="tag tag-accent">' + escapeHtml(featuredLabel) + '</span>' : '') +
+                '<span class="tag">' + escapeHtml(tag) + '</span>' +
+              '</div>' +
               '<span>' + escapeHtml(date) + '</span>' +
             '</div>' +
             '<h3 class="cert-title">' + escapeHtml(title) + '</h3>' +
@@ -465,7 +499,7 @@
      Unified Interactive Lightbox Modal (Bilingual live refresh supported)
      ------------------------------------------------------------------------ */
   let lbState = {
-    mode: 'photo', // 'exp' | 'prj' | 'certificate'
+    mode: 'exp',
     recordId: null,
     items: [],
     index: 0
@@ -650,6 +684,43 @@
   }
 
   /* ------------------------------------------------------------------------
+     Tactile Desktop Pointer Spotlight & Subtle Grid Parallax (60fps RAF)
+     ------------------------------------------------------------------------ */
+  function initDesktopMotion() {
+    if (prefersReducedMotion || !hasFinePointer) return;
+
+    const gridBg = document.getElementById('tech-grid-bg');
+    let rafPending = false;
+    let lastEvent = null;
+
+    document.addEventListener('pointermove', function (e) {
+      lastEvent = e;
+      if (rafPending) return;
+      rafPending = true;
+      requestAnimationFrame(function () {
+        rafPending = false;
+        if (!lastEvent) return;
+
+        // 1. Subtle background grid parallax (max +/- 7px)
+        if (gridBg && window.innerWidth >= 1024) {
+          const nx = (lastEvent.clientX / window.innerWidth - 0.5) * -14;
+          const ny = (lastEvent.clientY / window.innerHeight - 0.5) * -14;
+          gridBg.style.setProperty('--grid-x', nx.toFixed(1) + 'px');
+          gridBg.style.setProperty('--grid-y', ny.toFixed(1) + 'px');
+        }
+
+        // 2. Cursor-following subtle radial spotlight on interactive cards
+        const card = lastEvent.target && lastEvent.target.closest ? lastEvent.target.closest('.interactive-card') : null;
+        if (card) {
+          const rect = card.getBoundingClientRect();
+          card.style.setProperty('--mx', (lastEvent.clientX - rect.left).toFixed(1) + 'px');
+          card.style.setProperty('--my', (lastEvent.clientY - rect.top).toFixed(1) + 'px');
+        }
+      });
+    }, { passive: true });
+  }
+
+  /* ------------------------------------------------------------------------
      Bootstrap & Event Delegation
      ------------------------------------------------------------------------ */
   document.addEventListener('DOMContentLoaded', function () {
@@ -657,8 +728,17 @@
     setLanguage(getStoredLang(), false);
     updateWibClocks();
     setInterval(updateWibClocks, 1000);
+    initDesktopMotion();
 
     navigateTo(resolveViewFromHash(window.location.hash), false);
+
+    // Ensure sliding nav pill aligns after fonts load or viewport resizes
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(updateNavSlider);
+    }
+    window.addEventListener('resize', function () {
+      requestAnimationFrame(updateNavSlider);
+    }, { passive: true });
 
     window.addEventListener('hashchange', function () {
       navigateTo(resolveViewFromHash(window.location.hash), false);

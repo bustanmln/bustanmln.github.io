@@ -42,7 +42,10 @@
 </head>
 
 <body>
-  <!-- ================= PERSISTENT HEADER BAR ================= -->
+  <!-- Subtle GPU-Composited Technical Drafting Grid -->
+  <div id="tech-grid-bg" class="tech-grid-bg" aria-hidden="true"></div>
+
+  <!-- ================= PERSISTENT FULL-WIDTH HEADER ================= -->
   <header class="site-header">
     <div class="container header-inner">
       <a href="#home" data-nav-view="home" class="brand" aria-label="Bustan Nabiel Maulana Home">
@@ -54,7 +57,8 @@
       </a>
 
       <nav aria-label="Primary Navigation">
-        <ul class="nav-shell">
+        <ul id="desktop-nav-shell" class="nav-shell">
+          <span id="nav-slider" class="nav-slider" aria-hidden="true"></span>
           <li><a href="#home" data-nav-view="home" class="nav-item active" aria-current="page"><span class="nav-num">00</span><span data-i18n="nav.home">Home</span></a></li>
           <li><a href="#experience" data-nav-view="experience" class="nav-item"><span class="nav-num">01</span><span data-i18n="nav.experience">Experience</span></a></li>
           <li><a href="#projects" data-nav-view="projects" class="nav-item"><span class="nav-num">02</span><span data-i18n="nav.projects">Projects</span></a></li>
@@ -116,7 +120,7 @@
     </div>
   </header>
 
-  <!-- Mobile Navigation Drawer -->
+  <!-- Mobile / Tablet Navigation Drawer -->
   <div id="mobile-drawer" class="mobile-drawer" aria-label="Mobile Navigation">
     <ul class="mobile-nav-list">
       <li><a href="#home" data-nav-view="home" class="mobile-nav-link active"><span data-i18n="nav.home">Home</span><span class="mono">00</span></a></li>
@@ -152,193 +156,205 @@
     </div>
   </div>
 
-  <!-- ================= MULTI-LAYER MAIN STAGE ================= -->
+  <!-- ================= MULTI-LAYER MAIN STAGE (FULL-WIDTH 1600px) ================= -->
   <main class="main-stage">
     <div class="container">
 
       <!-- ===============================================================
-           LAYER 00: HOME
+           LAYER 00: HOME (ASYMMETRIC 40/60 SPLIT + BENTO OVERVIEW)
            =============================================================== -->
       <section id="view-home" class="view-layer active" aria-label="Home Overview">
-        <div class="hero-grid">
-          <!-- Left: Editorial Engineering Narrative -->
-          <div>
-            <div class="status-pill">
-              <span class="status-dot" aria-hidden="true"></span>
-              <span data-i18n="home.status">OPEN FOR INDUSTRIAL AUTOMATION, INSTRUMENTATION &amp; IOT ROLES</span>
-            </div>
-
-            <h1 class="hero-headline">
-              <span data-i18n="home.headline.pre">Industrial Automation, </span><span class="accent" data-i18n="home.headline.accent">Embedded IoT</span><span data-i18n="home.headline.post"> &amp; Applied AI.</span>
-            </h1>
-
-            <p class="hero-bio" data-i18n-html="home.bio.html">
-              I am <strong>Bustan Nabiel Maulana</strong>, a final-year Electrical Engineering student at
-              <strong>Telkom University</strong> specializing in industrial automation, field instrumentation, embedded
-              systems, robotics, and edge AI. Experienced in load cell calibration and PLC/HMI/SCADA field maintenance
-              at <strong>PT Semen Indonesia (Persero) Tbk (SIG) Pabrik Tuban</strong>, alongside active laboratory
-              coordination and applied research across IRIS, SPELL, and Daskom Laboratories.
-            </p>
-
-            <div class="kpi-strip" aria-label="Portfolio Metrics">
-              <a href="#experience" data-nav-view="experience" class="kpi-cell">
-                <span class="kpi-num">05</span>
-                <span class="kpi-label" data-i18n="home.kpi.exp">Field &amp; Lab Roles</span>
-              </a>
-              <a href="#projects" data-nav-view="projects" class="kpi-cell">
-                <span class="kpi-num">04</span>
-                <span class="kpi-label" data-i18n="home.kpi.prj">Hardware/AI Builds</span>
-              </a>
-              <a href="#certificates" data-nav-view="certificates" class="kpi-cell">
-                <span class="kpi-num">13</span>
-                <span class="kpi-label" data-i18n="home.kpi.cert">Verified Credentials</span>
-              </a>
-              <a href="#experience" data-jump-view="experience" data-jump-id="exp-sig" class="kpi-cell">
-                <span class="kpi-num">SIG</span>
-                <span class="kpi-label" data-i18n="home.kpi.sig">ELINS KC 3-4 Intern</span>
-              </a>
-            </div>
-
-            <div class="hero-actions">
-              <a href="#projects" data-nav-view="projects" class="btn btn-primary">
-                <span data-i18n="home.cta.projects">Explore Projects</span>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-              </a>
-              <a href="#experience" data-nav-view="experience" class="btn btn-secondary" data-i18n="home.cta.experience">Experience Deck</a>
-              <a href="#contact" data-nav-view="contact" class="btn btn-secondary" data-i18n="home.cta.contact">Contact</a>
-              <button type="button" class="btn btn-secondary" data-open-cv data-i18n="home.cta.cv">CV Summary</button>
-            </div>
-          </div>
-
-          <!-- Right: Engineer Identification Dossier -->
-          <aside class="dossier-card" aria-label="Engineer Profile Dossier">
-            <div class="dossier-head">
-              <div class="portrait-box">
-                <img src="images/profile/foto_profil.jpg" alt="Portrait of Bustan Nabiel Maulana" />
+        <div class="home-split">
+          <!-- Left Sticky 40% Column: Engineer Identification Dossier -->
+          <aside class="dossier-col stagger-item" style="--stagger-i:0" aria-label="Engineer Profile Dossier">
+            <div class="dossier-card interactive-card">
+              <div class="dossier-telemetry">
+                <span style="display:inline-flex; align-items:center; gap:0.45rem;">
+                  <span class="status-dot" aria-hidden="true"></span>
+                  <span>SYS // ONLINE</span>
+                </span>
+                <span data-wib-clock>00:00:00 WIB</span>
               </div>
-              <div class="dossier-identity">
-                <h2>Bustan Nabiel Maulana</h2>
-                <p class="dossier-title" data-i18n="dossier.title">Final-Year Electrical Engineering Student · Telkom University</p>
-                <div class="dossier-meta" data-i18n="dossier.meta">BANDUNG &amp; TUBAN, INDONESIA · TOP 30 NCIA PARAGONCORP</div>
+
+              <div class="dossier-head">
+                <div class="portrait-box">
+                  <img src="images/profile/foto_profil.jpg" alt="Portrait of Bustan Nabiel Maulana" />
+                </div>
+                <div class="dossier-identity">
+                  <h2>Bustan Nabiel Maulana</h2>
+                  <p class="dossier-title" data-i18n="dossier.title">Final-Year Electrical Engineering Student · Telkom University</p>
+                  <div class="dossier-meta" data-i18n="dossier.meta">BANDUNG &amp; TUBAN, INDONESIA · TOP 30 NCIA PARAGONCORP</div>
+                </div>
               </div>
-            </div>
 
-            <div class="dossier-body">
-              <table class="spec-table" aria-label="Technical Competencies">
-                <tbody>
-                  <tr>
-                    <th data-i18n="dossier.th.industrial">Industrial</th>
-                    <td>PLC, HMI, SCADA, Load Cell Calibration (PW 2/3), Control Valves, CSC Tools, Pfister HyperTerminal, MOVIDRIVE</td>
-                  </tr>
-                  <tr>
-                    <th data-i18n="dossier.th.embedded">Embedded</th>
-                    <td>ESP32, Raspberry Pi 4, Teensy, Arduino, PZEM-004T, VL53L0X ToF, TCRT5000, Ultrasonic Array, MQTT / Firebase</td>
-                  </tr>
-                  <tr>
-                    <th data-i18n="dossier.th.ai">AI &amp; Vision</th>
-                    <td>TensorFlow Lite, OpenCV, K-Nearest Neighbor (KNN), Signal Processing, Spatial Intelligence</td>
-                  </tr>
-                  <tr>
-                    <th data-i18n="dossier.th.software">Software</th>
-                    <td>C / C++, Python, Android Studio, Git / GitHub, Linux, Sphinx Documentation</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+              <div class="dossier-body">
+                <table class="spec-table" aria-label="Technical Competencies">
+                  <tbody>
+                    <tr>
+                      <th data-i18n="dossier.th.industrial">Industrial</th>
+                      <td>PLC, HMI, SCADA, Load Cell Calibration (PW 2/3), Control Valves, CSC Tools, Pfister HyperTerminal, MOVIDRIVE</td>
+                    </tr>
+                    <tr>
+                      <th data-i18n="dossier.th.embedded">Embedded</th>
+                      <td>ESP32, Raspberry Pi 4, Teensy, Arduino, PZEM-004T, VL53L0X ToF, TCRT5000, Ultrasonic Array, MQTT / Firebase</td>
+                    </tr>
+                    <tr>
+                      <th data-i18n="dossier.th.ai">AI &amp; Vision</th>
+                      <td>TensorFlow Lite, OpenCV, K-Nearest Neighbor (KNN), Signal Processing, Spatial Intelligence</td>
+                    </tr>
+                    <tr>
+                      <th data-i18n="dossier.th.software">Software</th>
+                      <td>C / C++, Python, Android Studio, Git / GitHub, Linux, Sphinx Documentation</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
 
-            <div class="dossier-foot">
-              <span class="mono" style="font-size:11px; color:var(--ink-muted);" data-i18n="dossier.channels">DIRECT CHANNELS</span>
-              <div class="social-icon-row">
-                <a class="icon-chip" href="mailto:bustanmaulana50@gmail.com" aria-label="Email Bustan" title="bustanmaulana50@gmail.com">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-                </a>
-                <a class="icon-chip" href="https://linkedin.com/in/bustannabiel" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" title="LinkedIn">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"></path></svg>
-                </a>
-                <a class="icon-chip" href="https://github.com/bustanmln" target="_blank" rel="noopener noreferrer" aria-label="GitHub" title="GitHub">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2A10 10 0 0 0 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.87 1.52 2.34 1.07 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0 0 12 2z"></path></svg>
-                </a>
-                <a class="icon-chip" href="https://wa.me/6281216919968" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" title="WhatsApp">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91C21.95 6.45 17.5 2 12.04 2m5.82 14.12c-.25.7-1.45 1.34-2 1.42-.51.08-1.15.11-1.86-.12-.43-.14-.98-.32-1.69-.63-2.98-1.29-4.92-4.3-5.07-4.5-.15-.2-1.21-1.61-1.21-3.07s.77-2.18 1.04-2.48c.27-.3.59-.37.79-.37.2 0 .4 0 .57.01.18.01.43-.07.67.51.25.6.85 2.07.92 2.22.07.15.12.32.02.52-.1.2-.15.32-.3.5-.15.17-.31.38-.45.51-.15.15-.3.31-.13.61.17.3.77 1.27 1.65 2.05 1.13 1.01 2.09 1.32 2.39 1.47.3.15.47.12.64-.07.17-.2.74-.86.94-1.16.2-.3.4-.25.67-.15.27.1 1.73.82 2.03.97.3.15.5.22.57.35.07.12.07.72-.18 1.42z"></path></svg>
-                </a>
+              <div class="dossier-foot">
+                <span class="mono" style="font-size:11px; color:var(--ink-muted);" data-i18n="dossier.channels">DIRECT CHANNELS</span>
+                <div class="social-icon-row">
+                  <a class="icon-chip" href="mailto:bustanmaulana50@gmail.com" aria-label="Email Bustan" title="bustanmaulana50@gmail.com">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                  </a>
+                  <a class="icon-chip" href="https://linkedin.com/in/bustannabiel" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" title="LinkedIn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"></path></svg>
+                  </a>
+                  <a class="icon-chip" href="https://github.com/bustanmln" target="_blank" rel="noopener noreferrer" aria-label="GitHub" title="GitHub">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2A10 10 0 0 0 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.87 1.52 2.34 1.07 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0 0 12 2z"></path></svg>
+                  </a>
+                  <a class="icon-chip" href="https://wa.me/6281216919968" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" title="WhatsApp">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91C21.95 6.45 17.5 2 12.04 2m5.82 14.12c-.25.7-1.45 1.34-2 1.42-.51.08-1.15.11-1.86-.12-.43-.14-.98-.32-1.69-.63-2.98-1.29-4.92-4.3-5.07-4.5-.15-.2-1.21-1.61-1.21-3.07s.77-2.18 1.04-2.48c.27-.3.59-.37.79-.37.2 0 .4 0 .57.01.18.01.43-.07.67.51.25.6.85 2.07.92 2.22.07.15.12.32.02.52-.1.2-.15.32-.3.5-.15.17-.31.38-.45.51-.15.15-.3.31-.13.61.17.3.77 1.27 1.65 2.05 1.13 1.01 2.09 1.32 2.39 1.47.3.15.47.12.64-.07.17-.2.74-.86.94-1.16.2-.3.4-.25.67-.15.27.1 1.73.82 2.03.97.3.15.5.22.57.35.07.12.07.72-.18 1.42z"></path></svg>
+                  </a>
+                </div>
               </div>
             </div>
           </aside>
+
+          <!-- Right Expansive 60% Column: Left-Aligned Hero Narrative + KPI + Pillars -->
+          <div class="home-main-col">
+            <div class="stagger-item" style="--stagger-i:1">
+              <div class="status-pill">
+                <span class="status-dot" aria-hidden="true"></span>
+                <span data-i18n="home.status">OPEN FOR INDUSTRIAL AUTOMATION, INSTRUMENTATION &amp; IOT ROLES</span>
+              </div>
+
+              <h1 class="hero-headline">
+                <span data-i18n="home.headline.pre">Industrial Automation, </span><span class="accent" data-i18n="home.headline.accent">Embedded IoT</span><span data-i18n="home.headline.post"> &amp; Applied AI.</span>
+              </h1>
+
+              <p class="hero-bio" data-i18n-html="home.bio.html">
+                I am <strong>Bustan Nabiel Maulana</strong>, a final-year Electrical Engineering student at
+                <strong>Telkom University</strong> specializing in industrial automation, field instrumentation, embedded
+                systems, robotics, and edge AI. Experienced in load cell calibration and PLC/HMI/SCADA field maintenance
+                at <strong>PT Semen Indonesia (Persero) Tbk (SIG) Pabrik Tuban</strong>, alongside active laboratory
+                coordination and applied research across IRIS, SPELL, and Daskom Laboratories.
+              </p>
+
+              <div class="kpi-strip" aria-label="Portfolio Metrics">
+                <a href="#experience" data-nav-view="experience" class="kpi-cell">
+                  <span class="kpi-num">05</span>
+                  <span class="kpi-label" data-i18n="home.kpi.exp">Field &amp; Lab Roles</span>
+                </a>
+                <a href="#projects" data-nav-view="projects" class="kpi-cell">
+                  <span class="kpi-num">04</span>
+                  <span class="kpi-label" data-i18n="home.kpi.prj">Hardware/AI Builds</span>
+                </a>
+                <a href="#certificates" data-nav-view="certificates" class="kpi-cell">
+                  <span class="kpi-num">13</span>
+                  <span class="kpi-label" data-i18n="home.kpi.cert">Verified Credentials</span>
+                </a>
+                <a href="#experience" data-jump-view="experience" data-jump-id="exp-sig" class="kpi-cell">
+                  <span class="kpi-num">SIG</span>
+                  <span class="kpi-label" data-i18n="home.kpi.sig">ELINS KC 3-4 Intern</span>
+                </a>
+              </div>
+
+              <div class="hero-actions">
+                <a href="#projects" data-nav-view="projects" class="btn btn-primary">
+                  <span data-i18n="home.cta.projects">Explore Projects</span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                </a>
+                <a href="#experience" data-nav-view="experience" class="btn btn-secondary" data-i18n="home.cta.experience">Experience Deck</a>
+                <a href="#contact" data-nav-view="contact" class="btn btn-secondary" data-i18n="home.cta.contact">Contact</a>
+                <button type="button" class="btn btn-secondary" data-open-cv data-i18n="home.cta.cv">CV Summary</button>
+              </div>
+            </div>
+
+            <!-- 00.1 Core Competency Pillars -->
+            <div class="stagger-item" style="--stagger-i:2">
+              <div class="subblock-head">
+                <h2 class="subblock-title" data-i18n="pillars.title">Core Engineering Pillars</h2>
+                <span class="mono" style="font-size:11px; color:var(--ink-muted);" data-i18n="pillars.code">00.1 // DISCIPLINE MATRIX</span>
+              </div>
+
+              <div class="pillars-grid">
+                <div class="pillar-card interactive-card">
+                  <div>
+                    <div class="pillar-head">
+                      <span class="eyebrow" data-i18n="pillars.c1.eyebrow">CH-01 // INDUSTRIAL</span>
+                      <span class="pillar-icon" aria-hidden="true">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                      </span>
+                    </div>
+                    <h3 data-i18n="pillars.c1.title">Industrial Automation &amp; Instrumentation</h3>
+                    <p data-i18n="pillars.c1.desc">Field maintenance of process sensors, Pulverized Weigher (PW 2 &amp; PW 3) load cell zero/span calibration, control valve inspection, and PLC/HMI/SCADA interconnection at PT Semen Indonesia (SIG).</p>
+                  </div>
+                  <div class="tag-list">
+                    <span class="tag">PLC / HMI / SCADA</span>
+                    <span class="tag">Load Cell Calibration</span>
+                    <span class="tag">MOVIDRIVE</span>
+                  </div>
+                </div>
+
+                <div class="pillar-card interactive-card">
+                  <div>
+                    <div class="pillar-head">
+                      <span class="eyebrow" data-i18n="pillars.c2.eyebrow">CH-02 // EMBEDDED</span>
+                      <span class="pillar-icon" aria-hidden="true">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="14" x2="23" y2="14"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="14" x2="4" y2="14"></line></svg>
+                      </span>
+                    </div>
+                    <h3 data-i18n="pillars.c2.title">Embedded Systems &amp; IoT Engineering</h3>
+                    <p data-i18n="pillars.c2.desc">End-to-end connected hardware using ESP32, Raspberry Pi 4, and Teensy with electrical metering (PZEM-004T), Firebase cloud telemetry, closed-loop robotics, and Android companion apps.</p>
+                  </div>
+                  <div class="tag-list">
+                    <span class="tag">ESP32 / RPi 4 / Teensy</span>
+                    <span class="tag">Firebase / MQTT</span>
+                    <span class="tag">Embedded C</span>
+                  </div>
+                </div>
+
+                <div class="pillar-card interactive-card">
+                  <div>
+                    <div class="pillar-head">
+                      <span class="eyebrow" data-i18n="pillars.c3.eyebrow">CH-03 // APPLIED AI</span>
+                      <span class="pillar-icon" aria-hidden="true">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                      </span>
+                    </div>
+                    <h3 data-i18n="pillars.c3.title">Computer Vision &amp; Signal Processing</h3>
+                    <p data-i18n="pillars.c3.desc">Edge inference using TensorFlow Lite and OpenCV on Raspberry Pi, K-Nearest Neighbor (KNN) power anomaly classification, and high-speed 4.6 Mbps ultrasonic phased-array signal processing.</p>
+                  </div>
+                  <div class="tag-list">
+                    <span class="tag">TensorFlow Lite</span>
+                    <span class="tag">OpenCV</span>
+                    <span class="tag">KNN / Python</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <!-- 00.1 Core Competency Pillars -->
-        <div class="home-subblock">
-          <div class="subblock-head">
-            <h2 class="subblock-title" data-i18n="pillars.title">Core Engineering Pillars</h2>
-            <span class="mono" style="font-size:11px; color:var(--ink-muted);" data-i18n="pillars.code">00.1 // DISCIPLINE MATRIX</span>
-          </div>
-
-          <div class="pillars-grid">
-            <div class="pillar-card">
-              <div>
-                <div class="pillar-head">
-                  <span class="eyebrow" data-i18n="pillars.c1.eyebrow">CH-01 // INDUSTRIAL</span>
-                  <span class="pillar-icon" aria-hidden="true">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-                  </span>
-                </div>
-                <h3 data-i18n="pillars.c1.title">Industrial Automation &amp; Instrumentation</h3>
-                <p data-i18n="pillars.c1.desc">Field maintenance of process sensors, Pulverized Weigher (PW 2 &amp; PW 3) load cell zero/span calibration, control valve inspection, and PLC/HMI/SCADA interconnection at PT Semen Indonesia (SIG).</p>
-              </div>
-              <div class="tag-list">
-                <span class="tag">PLC / HMI / SCADA</span>
-                <span class="tag">Load Cell Calibration</span>
-                <span class="tag">MOVIDRIVE</span>
-              </div>
-            </div>
-
-            <div class="pillar-card">
-              <div>
-                <div class="pillar-head">
-                  <span class="eyebrow" data-i18n="pillars.c2.eyebrow">CH-02 // EMBEDDED</span>
-                  <span class="pillar-icon" aria-hidden="true">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="14" x2="23" y2="14"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="14" x2="4" y2="14"></line></svg>
-                  </span>
-                </div>
-                <h3 data-i18n="pillars.c2.title">Embedded Systems &amp; IoT Engineering</h3>
-                <p data-i18n="pillars.c2.desc">End-to-end connected hardware using ESP32, Raspberry Pi 4, and Teensy with electrical metering (PZEM-004T), Firebase cloud telemetry, closed-loop robotics, and Android companion apps.</p>
-              </div>
-              <div class="tag-list">
-                <span class="tag">ESP32 / RPi 4 / Teensy</span>
-                <span class="tag">Firebase / MQTT</span>
-                <span class="tag">Embedded C</span>
-              </div>
-            </div>
-
-            <div class="pillar-card">
-              <div>
-                <div class="pillar-head">
-                  <span class="eyebrow" data-i18n="pillars.c3.eyebrow">CH-03 // APPLIED AI</span>
-                  <span class="pillar-icon" aria-hidden="true">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                  </span>
-                </div>
-                <h3 data-i18n="pillars.c3.title">Computer Vision &amp; Signal Processing</h3>
-                <p data-i18n="pillars.c3.desc">Edge inference using TensorFlow Lite and OpenCV on Raspberry Pi, K-Nearest Neighbor (KNN) power anomaly classification, and high-speed 4.6 Mbps ultrasonic phased-array signal processing.</p>
-              </div>
-              <div class="tag-list">
-                <span class="tag">TensorFlow Lite</span>
-                <span class="tag">OpenCV</span>
-                <span class="tag">KNN / Python</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 00.2 Quick Visual Index into Layers -->
-        <div class="home-subblock">
+        <!-- 00.2 Full-Width Selected Visual Highlights -->
+        <div class="home-subblock stagger-item" style="--stagger-i:3">
           <div class="subblock-head">
             <h2 class="subblock-title" data-i18n="highlights.title">Selected Highlights</h2>
             <span class="mono" style="font-size:11px; color:var(--ink-muted);" data-i18n="highlights.code">00.2 // DIRECT LAYER SHORTCUTS</span>
           </div>
 
           <div class="highlights-grid">
-            <button type="button" class="highlight-card" data-jump-view="experience" data-jump-id="exp-sig">
+            <button type="button" class="highlight-card interactive-card" data-jump-view="experience" data-jump-id="exp-sig">
               <div class="highlight-thumb">
                 <img src="images/experience/Instrumentation%20Maintenance%20Intern/Semen1.JPG" alt="PT Semen Indonesia Internship" loading="lazy" />
               </div>
@@ -349,7 +365,7 @@
               </div>
             </button>
 
-            <button type="button" class="highlight-card" data-jump-view="projects" data-jump-id="prj-sipesat">
+            <button type="button" class="highlight-card interactive-card" data-jump-view="projects" data-jump-id="prj-sipesat">
               <div class="highlight-thumb">
                 <img src="images/projects/SIPESAT%20%E2%80%93%20Sistem%20Pemilah%20Sampah%20Terpadu/IMG_20261120_103621.jpg" alt="SIPESAT Waste Sorting System" loading="lazy" />
               </div>
@@ -360,7 +376,7 @@
               </div>
             </button>
 
-            <button type="button" class="highlight-card" data-jump-view="projects" data-jump-id="prj-sumo">
+            <button type="button" class="highlight-card interactive-card" data-jump-view="projects" data-jump-id="prj-sumo">
               <div class="highlight-thumb">
                 <img src="images/projects/Autonomous%20Sumo%20Robot%20Navigation%20System/sumo.jpg" alt="Autonomous Sumo Robot" loading="lazy" />
               </div>
@@ -371,7 +387,7 @@
               </div>
             </button>
 
-            <button type="button" class="highlight-card" data-jump-view="certificates">
+            <button type="button" class="highlight-card interactive-card" data-jump-view="certificates">
               <div class="highlight-thumb contain-img">
                 <img src="images/certificates/oracle_ai_foundations.png" alt="Oracle OCI 2025 Certified AI Foundations Associate" loading="lazy" />
               </div>
@@ -386,10 +402,10 @@
       </section>
 
       <!-- ===============================================================
-           LAYER 01: EXPERIENCE (INTERACTIVE MASTER-DETAIL DECK)
+           LAYER 01: EXPERIENCE (FULL-WIDTH MASTER-DETAIL SPLIT)
            =============================================================== -->
       <section id="view-experience" class="view-layer" aria-label="Experience and Leadership">
-        <div class="layer-header">
+        <div class="layer-header stagger-item" style="--stagger-i:0">
           <div class="layer-header-row">
             <div>
               <span class="eyebrow" data-i18n="exp.eyebrow">01 // FIELD WORK, LABORATORIES &amp; LEADERSHIP</span>
@@ -408,17 +424,17 @@
           </div>
         </div>
 
-        <div class="split-grid">
+        <div class="split-grid stagger-item" style="--stagger-i:1">
           <div id="exp-directory" class="directory-list" aria-label="Experience Directory"></div>
           <div id="exp-detail" aria-live="polite"></div>
         </div>
       </section>
 
       <!-- ===============================================================
-           LAYER 02: PROJECTS (INTERACTIVE MASTER-DETAIL SHOWCASE)
+           LAYER 02: PROJECTS (FULL-WIDTH BENTO GRID + 2-COL BLUEPRINT)
            =============================================================== -->
       <section id="view-projects" class="view-layer" aria-label="Engineering Projects">
-        <div class="layer-header">
+        <div class="layer-header stagger-item" style="--stagger-i:0">
           <div class="layer-header-row">
             <div>
               <span class="eyebrow" data-i18n="prj.eyebrow">02 // HARDWARE, IOT, ROBOTICS &amp; AI BUILDS</span>
@@ -436,17 +452,23 @@
           </div>
         </div>
 
-        <div class="split-grid">
-          <div id="prj-directory" class="directory-list" aria-label="Projects Directory"></div>
-          <div id="prj-detail" aria-live="polite"></div>
+        <!-- 4-Up Bento Project Grid -->
+        <div id="prj-bento" class="projects-bento-grid stagger-item" style="--stagger-i:1" aria-label="Projects Bento Grid"></div>
+
+        <div class="bento-hint-bar stagger-item" style="--stagger-i:2">
+          <span class="status-dot" aria-hidden="true"></span>
+          <span data-i18n="prj.bentoHint">Select any project card above to inspect its full engineering datasheet &amp; photo gallery below.</span>
         </div>
+
+        <!-- Full-Width 2-Column Technical Blueprint -->
+        <div id="prj-detail" class="stagger-item" style="--stagger-i:2" aria-live="polite"></div>
       </section>
 
       <!-- ===============================================================
-           LAYER 03: CERTIFICATES (INTERACTIVE REGISTRY + NEXT/PREV LIGHTBOX)
+           LAYER 03: CERTIFICATES (FULL-WIDTH BENTO REGISTRY + LIGHTBOX)
            =============================================================== -->
       <section id="view-certificates" class="view-layer" aria-label="Official Certificates">
-        <div class="layer-header">
+        <div class="layer-header stagger-item" style="--stagger-i:0">
           <div class="layer-header-row">
             <div>
               <span class="eyebrow" data-i18n="cert.eyebrow">03 // VERIFIED CREDENTIALS REGISTRY</span>
@@ -465,14 +487,14 @@
           </div>
         </div>
 
-        <div id="certificates-grid" class="certs-grid"></div>
+        <div id="certificates-grid" class="certs-grid stagger-item" style="--stagger-i:1"></div>
       </section>
 
       <!-- ===============================================================
-           LAYER 04: CONTACT (OFFICIAL SVG ICONS & ACTIVE CHANNELS)
+           LAYER 04: CONTACT (FULL-WIDTH OFFICIAL SVG CHANNELS)
            =============================================================== -->
       <section id="view-contact" class="view-layer" aria-label="Contact Channels">
-        <div class="layer-header">
+        <div class="layer-header stagger-item" style="--stagger-i:0">
           <div>
             <span class="eyebrow" data-i18n="contact.eyebrow">04 // DIRECT ENGINEERING CHANNELS</span>
             <h2 class="layer-title" data-i18n="contact.title">Contact &amp; Collaboration</h2>
@@ -482,10 +504,10 @@
           </div>
         </div>
 
-        <div class="contact-layout">
+        <div class="contact-layout stagger-item" style="--stagger-i:1">
           <div class="contact-cards-grid">
             <!-- Email -->
-            <div class="contact-card">
+            <div class="contact-card interactive-card">
               <div class="contact-card-top">
                 <div>
                   <span class="contact-channel-name">Email</span>
@@ -512,7 +534,7 @@
             </div>
 
             <!-- LinkedIn -->
-            <div class="contact-card">
+            <div class="contact-card interactive-card">
               <div class="contact-card-top">
                 <div>
                   <span class="contact-channel-name">LinkedIn</span>
@@ -534,7 +556,7 @@
             </div>
 
             <!-- GitHub -->
-            <div class="contact-card">
+            <div class="contact-card interactive-card">
               <div class="contact-card-top">
                 <div>
                   <span class="contact-channel-name">GitHub</span>
@@ -556,7 +578,7 @@
             </div>
 
             <!-- WhatsApp -->
-            <div class="contact-card">
+            <div class="contact-card interactive-card">
               <div class="contact-card-top">
                 <div>
                   <span class="contact-channel-name">WhatsApp</span>
@@ -579,7 +601,7 @@
           </div>
 
           <!-- Availability & Dossier Panel -->
-          <aside class="availability-panel" aria-label="Availability Details">
+          <aside class="availability-panel interactive-card" aria-label="Availability Details">
             <div class="status-pill" style="align-self:flex-start;">
               <span class="status-dot" aria-hidden="true"></span>
               <span data-i18n="contact.avail.pill">AVAILABLE FOR OPPORTUNITIES</span>
@@ -622,6 +644,30 @@
 
     </div>
   </main>
+
+  <!-- ================= THUMB-FRIENDLY MOBILE BOTTOM NAV (< 768px) ================= -->
+  <nav class="mobile-bottom-nav" aria-label="Mobile Quick Navigation">
+    <a href="#home" data-nav-view="home" class="bottom-nav-item active" aria-current="page">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+      <span data-i18n="nav.short.home">Home</span>
+    </a>
+    <a href="#experience" data-nav-view="experience" class="bottom-nav-item">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+      <span data-i18n="nav.short.exp">Exp</span>
+    </a>
+    <a href="#projects" data-nav-view="projects" class="bottom-nav-item">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"></rect><rect x="9" y="9" width="6" height="6"></rect></svg>
+      <span data-i18n="nav.short.prj">Projects</span>
+    </a>
+    <a href="#certificates" data-nav-view="certificates" class="bottom-nav-item">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="6"></circle><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"></path></svg>
+      <span data-i18n="nav.short.cert">Certs</span>
+    </a>
+    <a href="#contact" data-nav-view="contact" class="bottom-nav-item">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+      <span data-i18n="nav.short.contact">Contact</span>
+    </a>
+  </nav>
 
   <!-- ================= PERSISTENT MINIMAL FOOTER ================= -->
   <footer class="site-footer">
