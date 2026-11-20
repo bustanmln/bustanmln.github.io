@@ -11,6 +11,7 @@
   <meta property="og:description"
     content="Final-Year Electrical Engineering student at Telkom University. Instrumentation Maintenance Intern at PT Semen Indonesia (SIG), IRIS & SPELL Lab, Daskom Hardware." />
   <meta property="og:type" content="website" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='8' fill='%230f172a'/%3E%3Crect x='3' y='3' width='58' height='58' rx='6' fill='none' stroke='%23c2410c' stroke-width='3'/%3E%3Ctext x='32' y='41' text-anchor='middle' font-family='monospace' font-weight='700' font-size='26' fill='%23f5f4f0'%3EBN%3C/text%3E%3C/svg%3E" />
 
   <!-- Zero-FOUC theme & language bootstrap -->
   <script>
@@ -57,14 +58,16 @@
       </a>
 
       <nav aria-label="Primary Navigation">
-        <ul id="desktop-nav-shell" class="nav-shell">
+        <div id="desktop-nav-shell" class="nav-shell">
           <span id="nav-slider" class="nav-slider" aria-hidden="true"></span>
-          <li><a href="#home" data-nav-view="home" class="nav-item active" aria-current="page"><span class="nav-num">00</span><span data-i18n="nav.home">Home</span></a></li>
-          <li><a href="#experience" data-nav-view="experience" class="nav-item"><span class="nav-num">01</span><span data-i18n="nav.experience">Experience</span></a></li>
-          <li><a href="#projects" data-nav-view="projects" class="nav-item"><span class="nav-num">02</span><span data-i18n="nav.projects">Projects</span></a></li>
-          <li><a href="#certificates" data-nav-view="certificates" class="nav-item"><span class="nav-num">03</span><span data-i18n="nav.certificates">Certificates</span></a></li>
-          <li><a href="#contact" data-nav-view="contact" class="nav-item"><span class="nav-num">04</span><span data-i18n="nav.contact">Contact</span></a></li>
-        </ul>
+          <ul class="nav-list">
+            <li><a href="#home" data-nav-view="home" class="nav-item active" aria-current="page"><span class="nav-num">00</span><span data-i18n="nav.home">Home</span></a></li>
+            <li><a href="#experience" data-nav-view="experience" class="nav-item"><span class="nav-num">01</span><span data-i18n="nav.experience">Experience</span></a></li>
+            <li><a href="#projects" data-nav-view="projects" class="nav-item"><span class="nav-num">02</span><span data-i18n="nav.projects">Projects</span></a></li>
+            <li><a href="#certificates" data-nav-view="certificates" class="nav-item"><span class="nav-num">03</span><span data-i18n="nav.certificates">Certificates</span></a></li>
+            <li><a href="#contact" data-nav-view="contact" class="nav-item"><span class="nav-num">04</span><span data-i18n="nav.contact">Contact</span></a></li>
+          </ul>
+        </div>
       </nav>
 
       <div class="header-actions">
@@ -99,7 +102,7 @@
           </button>
         </div>
 
-        <button type="button" class="btn btn-primary btn-sm" data-open-cv>
+        <button type="button" class="btn btn-primary btn-sm header-cv-btn" data-open-cv>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
             <polyline points="14 2 14 8 20 8"></polyline>
@@ -128,6 +131,7 @@
       <li><a href="#projects" data-nav-view="projects" class="mobile-nav-link"><span data-i18n="mobile.projects">Projects Showcase</span><span class="mono">02</span></a></li>
       <li><a href="#certificates" data-nav-view="certificates" class="mobile-nav-link"><span data-i18n="mobile.certificates">Official Certificates (13)</span><span class="mono">03</span></a></li>
       <li><a href="#contact" data-nav-view="contact" class="mobile-nav-link"><span data-i18n="mobile.contact">Contact Channels</span><span class="mono">04</span></a></li>
+      <li><button type="button" class="mobile-nav-link" style="width:100%;" data-open-cv><span data-i18n="home.cta.cv">CV Summary</span><span class="mono">CV</span></button></li>
     </ul>
     <div class="mobile-drawer-foot mobile-controls-row">
       <div class="mobile-control-group">
@@ -166,8 +170,8 @@
       <section id="view-home" class="view-layer active" aria-label="Home Overview">
         <div class="home-split">
           <!-- Left Sticky 40% Column: Engineer Identification Dossier -->
-          <aside class="dossier-col stagger-item" style="--stagger-i:0" aria-label="Engineer Profile Dossier">
-            <div class="dossier-card interactive-card">
+          <aside class="dossier-col" aria-label="Engineer Profile Dossier">
+            <div class="dossier-card interactive-card stagger-item" style="--stagger-i:0">
               <div class="dossier-telemetry">
                 <span style="display:inline-flex; align-items:center; gap:0.45rem;">
                   <span class="status-dot" aria-hidden="true"></span>

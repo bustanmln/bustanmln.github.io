@@ -273,13 +273,19 @@ a:focus-visible,
   display: none;
   position: relative;
   align-items: center;
-  gap: 0.2rem;
-  list-style: none;
-  margin: 0;
   padding: 4px;
   background: var(--surface-alt);
   border: 1px solid var(--border);
   border-radius: var(--radius);
+}
+
+.nav-list {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
 .nav-slider {
@@ -293,11 +299,11 @@ a:focus-visible,
   pointer-events: none;
   z-index: 0;
   opacity: 0;
-  transition: transform 0.28s var(--ease-out-expo), width 0.28s var(--ease-out-expo), opacity 0.18s ease;
+  transition: transform 0.26s var(--ease-out-expo), width 0.26s var(--ease-out-expo), opacity 0.16s ease;
   will-change: transform, width;
 }
 
-.nav-shell li {
+.nav-list li {
   position: relative;
   z-index: 1;
 }
@@ -305,8 +311,8 @@ a:focus-visible,
 .nav-item {
   display: inline-flex;
   align-items: center;
-  gap: 0.38rem;
-  padding: 0.44rem 0.85rem;
+  gap: 0.35rem;
+  padding: 0.42rem 0.68rem;
   font-family: var(--font-mono);
   font-size: 12px;
   font-weight: 500;
@@ -328,6 +334,17 @@ a:focus-visible,
 .nav-num {
   font-size: 10px;
   opacity: 0.65;
+  display: none;
+}
+
+@media (min-width: 1220px) {
+  .nav-item {
+    padding: 0.44rem 0.85rem;
+  }
+
+  .nav-num {
+    display: inline;
+  }
 }
 
 .header-actions {
@@ -626,17 +643,17 @@ a:focus-visible,
 @keyframes staggerReveal {
   from {
     opacity: 0;
-    transform: translate3d(0, 12px, 0);
+    transform: translate3d(0, 8px, 0);
   }
   to {
     opacity: 1;
-    transform: translate3d(0, 0, 0);
+    transform: none;
   }
 }
 
 .view-layer.active .stagger-item {
-  animation: staggerReveal 0.42s var(--ease-out-expo) both;
-  animation-delay: calc(var(--stagger-i, 0) * 55ms);
+  animation: staggerReveal 0.28s var(--ease-out-expo) both;
+  animation-delay: calc(var(--stagger-i, 0) * 35ms);
 }
 
 .layer-header {
@@ -1445,7 +1462,10 @@ a.kpi-cell:hover .kpi-num {
   border-radius: var(--radius);
   box-shadow: var(--shadow-sm);
   overflow: hidden;
-  animation: staggerReveal 0.3s var(--ease-out-expo) both;
+}
+
+.detail-sheet.detail-enter {
+  animation: staggerReveal 0.24s var(--ease-out-expo) both;
 }
 
 .detail-sheet-wide {
@@ -2075,7 +2095,7 @@ a.kpi-cell:hover .kpi-num {
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 100;
+  z-index: 200;
   background: rgba(9, 12, 18, 0.86);
   backdrop-filter: blur(5px);
   display: none;
@@ -2281,6 +2301,19 @@ a.kpi-cell:hover .kpi-num {
    Responsive Breakpoints: Mobile (<640), Tablet (640-1024), Laptop (1024-1440), Wide (>1440)
    ========================================================================== */
 
+/* Compact Mobile Header Clearance (< 480px) so brand name never crushes */
+@media (max-width: 479.98px) {
+  .header-cv-btn {
+    display: none;
+  }
+
+  .brand-mark {
+    width: 32px;
+    height: 32px;
+    font-size: 11px;
+  }
+}
+
 /* Mobile Touch Target Guarantees & Bottom Nav Clearance */
 @media (max-width: 767.98px) {
   body {
@@ -2389,11 +2422,11 @@ a.kpi-cell:hover .kpi-num {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
-  .detail-sheet-wide {
+  #prj-detail .detail-sheet-wide {
     grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr);
   }
 
-  .detail-sheet-wide .media-showcase {
+  #prj-detail .detail-sheet-wide .media-showcase {
     border-bottom: none;
     border-right: 1px solid var(--border-subtle);
   }
@@ -2445,6 +2478,11 @@ a.kpi-cell:hover .kpi-num {
   /* Experience Inspection Sheet becomes wide side-by-side on >=1440px */
   #exp-detail .detail-sheet-wide {
     grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  }
+
+  #exp-detail .detail-sheet-wide .media-showcase {
+    border-bottom: none;
+    border-right: 1px solid var(--border-subtle);
   }
 
   /* Certificates: Featured Full Banner + 4-Col Symmetrical Grid (12 = 4×3) */

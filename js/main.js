@@ -1,18 +1,21 @@
 /* ==========================================================================
    Bustan Nabiel Maulana — Full-Width Multi-Layer Portfolio Controller (ID/EN)
    - Hash-based Multi-Layer SPA (#home, #experience, #projects, #certificates, #contact)
-   - Sliding Desktop Nav Indicator + Staggered Layer Reveal + Cursor Spotlight
+   - Pixel-Exact Sliding Nav Indicator + Snappy Staggered Reveal + Cursor Spotlight
    - Live ID/EN i18n without reload or layer/modal reset (localStorage persisted)
-   - Full-Width Bento Projects + Master-Detail Experience + Interactive Certificates
+   - Zero-Flicker In-Place Photo Switching + Fullscreen Lightbox Sync
+   - Defensive DOM null guards & full mobile drawer/keyboard/Back-Forward support
    ========================================================================== */
 
 (function () {
   'use strict';
 
   const I18N = window.PORTFOLIO_I18N;
-  const EXPERIENCES = I18N.experiences;
-  const PROJECTS = I18N.projects;
-  const CERTIFICATES = I18N.certificates;
+  if (!I18N || !I18N.ui) return;
+
+  const EXPERIENCES = I18N.experiences || [];
+  const PROJECTS = I18N.projects || [];
+  const CERTIFICATES = I18N.certificates || [];
 
   const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const hasFinePointer = window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
@@ -30,10 +33,16 @@
   };
 
   /* ------------------------------------------------------------------------
-     Localization & Utility Helpers
+     Safe DOM & Localization Helpers
      ------------------------------------------------------------------------ */
   const LANG_KEY = 'bustan-lang-preference';
   let currentLang = 'en';
+
+  function onId(id, evt, handler) {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener(evt, handler);
+    return el;
+  }
 
   function getStoredLang() {
     try {
@@ -46,7 +55,7 @@
   function t(key) {
     const pack = I18N.ui[currentLang] || I18N.ui.en;
     if (Object.prototype.hasOwnProperty.call(pack, key)) return pack[key];
-    return I18N.ui.en[key] || key;
+    return Object.prototype.hasOwnProperty.call(I18N.ui.en, key) ? I18N.ui.en[key] : key;
   }
 
   function pick(val) {
@@ -98,10 +107,10 @@
       try { localStorage.setItem(LANG_KEY, currentLang); } catch (_) {}
     }
 
-    // Translate static & dynamic UI in-place WITHOUT changing active layer or scroll
+    // Translate static & dynamic UI in-place WITHOUT changing active layer, scroll, or open modals
     applyStaticTranslations();
-    renderExperienceView();
-    renderProjectsView();
+    renderExperienceView(false);
+    renderProjectsView(false);
     renderCertificatesView();
 
     const lbModal = document.getElementById('lightbox-modal');
@@ -109,16 +118,17 @@
       renderLightboxFrame();
     }
 
-    // Re-align sliding nav indicator after label width changes (e.g., Projects -> Proyek)
     requestAnimationFrame(updateNavSlider);
   }
 
   function copyToClipboard(text, btnEl) {
     const done = function () {
       if (!btnEl) return;
-      btnEl.innerHTML = ICONS.check + ' <span>' + escapeHtml(t('contact.copied')) + '</span>';
-      setTimeout(function () {
+      if (btnEl._copyTimer) clearTimeout(btnEl._copyTimer);
+      btnEl.innerHTML = ICONS.check + ' <span data-i18n="contact.copied">' + escapeHtml(t('contact.copied')) + '</span>';
+      btnEl._copyTimer = setTimeout(function () {
         btnEl.innerHTML = ICONS.copy + ' <span data-i18n="contact.email.copy">' + escapeHtml(t('contact.email.copy')) + '</span>';
+        btnEl._copyTimer = null;
       }, 1800);
     };
     if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -143,7 +153,7 @@
   }
 
   /* ------------------------------------------------------------------------
-     Sliding Desktop Nav Indicator
+     Pixel-Exact Sliding Desktop Nav Indicator
      ------------------------------------------------------------------------ */
   function updateNavSlider() {
     const shell = document.getElementById('desktop-nav-shell');
@@ -156,10 +166,22 @@
     }
     const shellRect = shell.getBoundingClientRect();
     const linkRect = activeLink.getBoundingClientRect();
-    const x = linkRect.left - shellRect.left;
+    const x = linkRect.left - shellRect.left - shell.clientLeft;
     slider.style.width = linkRect.width + 'px';
-    slider.style.transform = 'translate3d(' + x + 'px, 0, 0)';
+    slider.style.transform = 'translate3d(' + x.toFixed(1) + 'px, 0, 0)';
     slider.style.opacity = '1';
+  }
+
+  /* ------------------------------------------------------------------------
+     Mobile Drawer Helper
+     ------------------------------------------------------------------------ */
+  function closeMobileDrawer() {
+    const drawer = document.getElementById('mobile-drawer');
+    const toggle = document.getElementById('mobile-menu-btn');
+    if (drawer && drawer.classList.contains('open')) {
+      drawer.classList.remove('open');
+      if (toggle) toggle.setAttribute('aria-expanded', 'false');
+    }
   }
 
   /* ------------------------------------------------------------------------
@@ -175,6 +197,11 @@
 
   function navigateTo(viewId, updateHash) {
     const target = VALID_VIEWS.includes(viewId) ? viewId : 'home';
+
+    // Close any open overlays when navigating between layers
+    closeMobileDrawer();
+    closeLightbox(false);
+    closeCvModal();
 
     VALID_VIEWS.forEach(function (v) {
       const layer = document.getElementById('view-' + v);
@@ -192,14 +219,7 @@
       window.location.hash = target;
     }
 
-    const drawer = document.getElementById('mobile-drawer');
-    const toggle = document.getElementById('mobile-menu-btn');
-    if (drawer && drawer.classList.contains('open')) {
-      drawer.classList.remove('open');
-      if (toggle) toggle.setAttribute('aria-expanded', 'false');
-    }
-
-    window.scrollTo({ top: 0, behavior: 'instant' });
+    window.scrollTo(0, 0);
     requestAnimationFrame(updateNavSlider);
   }
 
@@ -239,11 +259,11 @@
   }
 
   /* ------------------------------------------------------------------------
-     Experience Master-Detail Controller (Full-Width Split)
+     Experience Master-Detail Controller (Zero-Flicker Stage Updates)
      ------------------------------------------------------------------------ */
   const expState = {
     filter: 'all',
-    selectedId: EXPERIENCES[0].id,
+    selectedId: EXPERIENCES[0] ? EXPERIENCES[0].id : '',
     photoIdx: 0
   };
 
@@ -252,10 +272,28 @@
     return EXPERIENCES.filter(function (e) { return e.track === expState.filter; });
   }
 
-  function renderExperienceView() {
+  function updateExpPhotoStage() {
+    const active = EXPERIENCES.find(function (e) { return e.id === expState.selectedId; });
+    if (!active || !active.photos.length) return;
+    const photo = active.photos[expState.photoIdx] || active.photos[0];
+    const imgEl = document.getElementById('exp-stage-img');
+    const counterEl = document.getElementById('exp-stage-counter');
+    const capEl = document.getElementById('exp-stage-cap');
+    if (imgEl) {
+      imgEl.src = safeUrl(photo.src);
+      imgEl.alt = pick(photo.caption);
+    }
+    if (counterEl) counterEl.textContent = (expState.photoIdx + 1) + ' / ' + active.photos.length;
+    if (capEl) capEl.textContent = pick(photo.caption);
+    document.querySelectorAll('#exp-detail .thumb-btn').forEach(function (btn) {
+      btn.classList.toggle('active', Number(btn.getAttribute('data-exp-photo')) === expState.photoIdx);
+    });
+  }
+
+  function renderExperienceView(animateEnter) {
     const listEl = document.getElementById('exp-directory');
     const detailEl = document.getElementById('exp-detail');
-    if (!listEl || !detailEl) return;
+    if (!listEl || !detailEl || !EXPERIENCES.length) return;
 
     const filtered = getFilteredExperiences();
     if (!filtered.some(function (e) { return e.id === expState.selectedId; })) {
@@ -291,18 +329,18 @@
     const bullets = pick(active.bullets);
 
     detailEl.innerHTML =
-      '<div class="detail-sheet detail-sheet-wide">' +
+      '<div class="detail-sheet detail-sheet-wide' + (animateEnter ? ' detail-enter' : '') + '">' +
         '<div class="media-showcase">' +
           '<div class="media-stage">' +
             (active.photos.length > 1
               ? '<button type="button" class="stage-arrow prev" data-exp-step="-1" aria-label="Previous photo">' + ICONS.prev + '</button>' +
                 '<button type="button" class="stage-arrow next" data-exp-step="1" aria-label="Next photo">' + ICONS.next + '</button>'
               : '') +
-            '<img src="' + safeAttrUrl(currentPhoto.src) + '" alt="' + escapeHtml(pick(currentPhoto.caption)) + '" data-open-exp-lb="true" />' +
-            '<span class="stage-counter">' + (expState.photoIdx + 1) + ' / ' + active.photos.length + '</span>' +
+            '<img id="exp-stage-img" src="' + safeAttrUrl(currentPhoto.src) + '" alt="' + escapeHtml(pick(currentPhoto.caption)) + '" data-open-exp-lb="true" />' +
+            '<span id="exp-stage-counter" class="stage-counter">' + (expState.photoIdx + 1) + ' / ' + active.photos.length + '</span>' +
             '<button type="button" class="stage-expand-btn" data-open-exp-lb="true">' + ICONS.expand + '<span>' + escapeHtml(t('common.fullscreen')) + '</span></button>' +
           '</div>' +
-          '<div class="stage-caption"><span>' + escapeHtml(pick(currentPhoto.caption)) + '</span></div>' +
+          '<div class="stage-caption"><span id="exp-stage-cap">' + escapeHtml(pick(currentPhoto.caption)) + '</span></div>' +
           '<div class="thumb-strip">' +
             active.photos.map(function (p, i) {
               return (
@@ -337,11 +375,11 @@
   }
 
   /* ------------------------------------------------------------------------
-     Projects Bento Overview + Full-Width Technical Blueprint Controller
+     Projects Bento Overview + Full-Width Blueprint Controller (Zero-Flicker)
      ------------------------------------------------------------------------ */
   const prjState = {
     filter: 'all',
-    selectedId: PROJECTS[0].id,
+    selectedId: PROJECTS[0] ? PROJECTS[0].id : '',
     photoIdx: 0
   };
 
@@ -350,10 +388,28 @@
     return PROJECTS.filter(function (p) { return p.category === prjState.filter; });
   }
 
-  function renderProjectsView() {
+  function updatePrjPhotoStage() {
+    const active = PROJECTS.find(function (p) { return p.id === prjState.selectedId; });
+    if (!active || !active.photos.length) return;
+    const photo = active.photos[prjState.photoIdx] || active.photos[0];
+    const imgEl = document.getElementById('prj-stage-img');
+    const counterEl = document.getElementById('prj-stage-counter');
+    const capEl = document.getElementById('prj-stage-cap');
+    if (imgEl) {
+      imgEl.src = safeUrl(photo.src);
+      imgEl.alt = pick(photo.caption);
+    }
+    if (counterEl) counterEl.textContent = (prjState.photoIdx + 1) + ' / ' + active.photos.length;
+    if (capEl) capEl.textContent = pick(photo.caption);
+    document.querySelectorAll('#prj-detail .thumb-btn').forEach(function (btn) {
+      btn.classList.toggle('active', Number(btn.getAttribute('data-prj-photo')) === prjState.photoIdx);
+    });
+  }
+
+  function renderProjectsView(animateEnter) {
     const bentoEl = document.getElementById('prj-bento');
     const detailEl = document.getElementById('prj-detail');
-    if (!bentoEl || !detailEl) return;
+    if (!bentoEl || !detailEl || !PROJECTS.length) return;
 
     const filtered = getFilteredProjects();
     if (!filtered.some(function (p) { return p.id === prjState.selectedId; })) {
@@ -389,18 +445,18 @@
     }).join('');
 
     detailEl.innerHTML =
-      '<div class="detail-sheet detail-sheet-wide">' +
+      '<div class="detail-sheet detail-sheet-wide' + (animateEnter ? ' detail-enter' : '') + '">' +
         '<div class="media-showcase">' +
           '<div class="media-stage">' +
             (active.photos.length > 1
               ? '<button type="button" class="stage-arrow prev" data-prj-step="-1" aria-label="Previous photo">' + ICONS.prev + '</button>' +
                 '<button type="button" class="stage-arrow next" data-prj-step="1" aria-label="Next photo">' + ICONS.next + '</button>'
               : '') +
-            '<img src="' + safeAttrUrl(currentPhoto.src) + '" alt="' + escapeHtml(pick(currentPhoto.caption)) + '" data-open-prj-lb="true" />' +
-            '<span class="stage-counter">' + (prjState.photoIdx + 1) + ' / ' + active.photos.length + '</span>' +
+            '<img id="prj-stage-img" src="' + safeAttrUrl(currentPhoto.src) + '" alt="' + escapeHtml(pick(currentPhoto.caption)) + '" data-open-prj-lb="true" />' +
+            '<span id="prj-stage-counter" class="stage-counter">' + (prjState.photoIdx + 1) + ' / ' + active.photos.length + '</span>' +
             '<button type="button" class="stage-expand-btn" data-open-prj-lb="true">' + ICONS.expand + '<span>' + escapeHtml(t('common.fullscreen')) + '</span></button>' +
           '</div>' +
-          '<div class="stage-caption"><span>' + escapeHtml(pick(currentPhoto.caption)) + '</span></div>' +
+          '<div class="stage-caption"><span id="prj-stage-cap">' + escapeHtml(pick(currentPhoto.caption)) + '</span></div>' +
           '<div class="thumb-strip">' +
             active.photos.map(function (p, i) {
               return (
@@ -496,7 +552,7 @@
   }
 
   /* ------------------------------------------------------------------------
-     Unified Interactive Lightbox Modal (Bilingual live refresh supported)
+     Unified Interactive Lightbox Modal (Bilingual live refresh & photo sync)
      ------------------------------------------------------------------------ */
   let lbState = {
     mode: 'exp',
@@ -506,11 +562,13 @@
   };
 
   function openLightbox(config) {
+    const items = config.items || [];
+    if (!items.length) return;
     lbState = {
       mode: config.mode || 'exp',
       recordId: config.recordId || null,
-      items: config.items || [],
-      index: Math.max(0, Math.min(config.index || 0, (config.items || []).length - 1))
+      items: items,
+      index: Math.max(0, Math.min(config.index || 0, items.length - 1))
     };
     renderLightboxFrame();
     const modal = document.getElementById('lightbox-modal');
@@ -521,12 +579,22 @@
     }
   }
 
-  function closeLightbox() {
+  function closeLightbox(syncBack) {
     const modal = document.getElementById('lightbox-modal');
-    if (modal) {
-      modal.classList.remove('open');
-      modal.setAttribute('aria-hidden', 'true');
-      document.body.style.overflow = '';
+    if (!modal || !modal.classList.contains('open')) return;
+    modal.classList.remove('open');
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+
+    // Sync active photo index back to Experience/Project stage without flicker
+    if (syncBack !== false) {
+      if (lbState.mode === 'exp' && lbState.recordId === expState.selectedId) {
+        expState.photoIdx = lbState.index;
+        updateExpPhotoStage();
+      } else if (lbState.mode === 'prj' && lbState.recordId === prjState.selectedId) {
+        prjState.photoIdx = lbState.index;
+        updatePrjPhotoStage();
+      }
     }
   }
 
@@ -550,6 +618,8 @@
     const detailsMeta = document.getElementById('lb-details-meta');
     const descEl = document.getElementById('lb-desc');
     const thumbsEl = document.getElementById('lb-thumbs');
+    const prevBtn = document.getElementById('lb-prev');
+    const nextBtn = document.getElementById('lb-next');
 
     if (lbState.mode === 'certificate') {
       const title = pick(item.title);
@@ -557,19 +627,20 @@
       const date = pick(item.date);
       const tag = pick(item.tag);
 
-      kickerEl.textContent = tag + ' · ' + date;
-      titleEl.textContent = title;
-      imgEl.src = safeUrl(item.image);
-      imgEl.alt = title;
-      capEl.textContent = issuer;
-      openRawEl.href = safeUrl(item.image);
+      if (kickerEl) kickerEl.textContent = tag + ' · ' + date;
+      if (titleEl) titleEl.textContent = title;
+      if (imgEl) { imgEl.src = safeUrl(item.image); imgEl.alt = title; }
+      if (capEl) capEl.textContent = issuer;
+      if (openRawEl) openRawEl.href = safeUrl(item.image);
 
-      detailsBox.style.display = 'flex';
-      detailsMeta.innerHTML =
-        '<span class="tag tag-accent">' + escapeHtml(issuer) + '</span>' +
-        '<span class="tag">' + escapeHtml(date) + '</span>' +
-        '<span class="tag">ID: ' + escapeHtml(item.credId) + '</span>';
-      descEl.textContent = pick(item.desc);
+      if (detailsBox) detailsBox.style.display = 'flex';
+      if (detailsMeta) {
+        detailsMeta.innerHTML =
+          '<span class="tag tag-accent">' + escapeHtml(issuer) + '</span>' +
+          '<span class="tag">' + escapeHtml(date) + '</span>' +
+          '<span class="tag">ID: ' + escapeHtml(item.credId) + '</span>';
+      }
+      if (descEl) descEl.textContent = pick(item.desc);
     } else {
       const rec = lbState.mode === 'exp'
         ? EXPERIENCES.find(function (e) { return e.id === lbState.recordId; })
@@ -578,35 +649,36 @@
       const recTitle = rec ? pick(rec.role || rec.title) : '';
       const caption = pick(item.caption);
 
-      kickerEl.textContent = recKicker;
-      titleEl.textContent = recTitle;
-      imgEl.src = safeUrl(item.src);
-      imgEl.alt = caption || recTitle;
-      capEl.textContent = caption || '';
-      openRawEl.href = safeUrl(item.src);
-      detailsBox.style.display = 'none';
+      if (kickerEl) kickerEl.textContent = recKicker;
+      if (titleEl) titleEl.textContent = recTitle;
+      if (imgEl) { imgEl.src = safeUrl(item.src); imgEl.alt = caption || recTitle; }
+      if (capEl) capEl.textContent = caption || '';
+      if (openRawEl) openRawEl.href = safeUrl(item.src);
+      if (detailsBox) detailsBox.style.display = 'none';
     }
 
-    countEl.textContent = (lbState.index + 1) + ' / ' + lbState.items.length;
+    if (countEl) countEl.textContent = (lbState.index + 1) + ' / ' + lbState.items.length;
 
     const multi = lbState.items.length > 1;
-    document.getElementById('lb-prev').style.display = multi ? 'grid' : 'none';
-    document.getElementById('lb-next').style.display = multi ? 'grid' : 'none';
+    if (prevBtn) prevBtn.style.display = multi ? 'grid' : 'none';
+    if (nextBtn) nextBtn.style.display = multi ? 'grid' : 'none';
 
-    if (multi) {
-      thumbsEl.style.display = 'flex';
-      thumbsEl.innerHTML = lbState.items.map(function (entry, i) {
-        const src = lbState.mode === 'certificate' ? entry.image : entry.src;
-        const alt = lbState.mode === 'certificate' ? pick(entry.title) : pick(entry.caption);
-        return (
-          '<button type="button" class="thumb-btn' + (i === lbState.index ? ' active' : '') + '" data-lb-jump="' + i + '" aria-label="Jump to item ' + (i + 1) + '">' +
-            '<img src="' + safeAttrUrl(src) + '" alt="' + escapeHtml(alt || '') + '" />' +
-          '</button>'
-        );
-      }).join('');
-    } else {
-      thumbsEl.style.display = 'none';
-      thumbsEl.innerHTML = '';
+    if (thumbsEl) {
+      if (multi) {
+        thumbsEl.style.display = 'flex';
+        thumbsEl.innerHTML = lbState.items.map(function (entry, i) {
+          const src = lbState.mode === 'certificate' ? entry.image : entry.src;
+          const alt = lbState.mode === 'certificate' ? pick(entry.title) : pick(entry.caption);
+          return (
+            '<button type="button" class="thumb-btn' + (i === lbState.index ? ' active' : '') + '" data-lb-jump="' + i + '" aria-label="Jump to item ' + (i + 1) + '">' +
+              '<img src="' + safeAttrUrl(src) + '" alt="' + escapeHtml(alt || '') + '" />' +
+            '</button>'
+          );
+        }).join('');
+      } else {
+        thumbsEl.style.display = 'none';
+        thumbsEl.innerHTML = '';
+      }
     }
   }
 
@@ -614,6 +686,7 @@
      CV Summary Modal & Profile JSON Export
      ------------------------------------------------------------------------ */
   function openCvModal() {
+    closeMobileDrawer();
     const m = document.getElementById('cv-modal');
     if (m) {
       m.classList.add('open');
@@ -624,7 +697,7 @@
 
   function closeCvModal() {
     const m = document.getElementById('cv-modal');
-    if (m) {
+    if (m && m.classList.contains('open')) {
       m.classList.remove('open');
       m.setAttribute('aria-hidden', 'true');
       document.body.style.overflow = '';
@@ -701,7 +774,6 @@
         rafPending = false;
         if (!lastEvent) return;
 
-        // 1. Subtle background grid parallax (max +/- 7px)
         if (gridBg && window.innerWidth >= 1024) {
           const nx = (lastEvent.clientX / window.innerWidth - 0.5) * -14;
           const ny = (lastEvent.clientY / window.innerHeight - 0.5) * -14;
@@ -709,7 +781,6 @@
           gridBg.style.setProperty('--grid-y', ny.toFixed(1) + 'px');
         }
 
-        // 2. Cursor-following subtle radial spotlight on interactive cards
         const card = lastEvent.target && lastEvent.target.closest ? lastEvent.target.closest('.interactive-card') : null;
         if (card) {
           const rect = card.getBoundingClientRect();
@@ -721,7 +792,7 @@
   }
 
   /* ------------------------------------------------------------------------
-     Bootstrap & Event Delegation
+     Bootstrap & Single Delegated Event Architecture (Zero Duplicate Listeners)
      ------------------------------------------------------------------------ */
   document.addEventListener('DOMContentLoaded', function () {
     applyTheme(getStoredTheme(), false);
@@ -732,7 +803,6 @@
 
     navigateTo(resolveViewFromHash(window.location.hash), false);
 
-    // Ensure sliding nav pill aligns after fonts load or viewport resizes
     if (document.fonts && document.fonts.ready) {
       document.fonts.ready.then(updateNavSlider);
     }
@@ -744,67 +814,76 @@
       navigateTo(resolveViewFromHash(window.location.hash), false);
     });
 
-    // Language switcher controls (Desktop & Mobile)
-    document.querySelectorAll('[data-lang-opt]').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        setLanguage(btn.getAttribute('data-lang-opt'), true);
-      });
-    });
-
-    // Theme controls
-    document.querySelectorAll('[data-theme-opt]').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        applyTheme(btn.getAttribute('data-theme-opt'), true);
-      });
-    });
-
     // Mobile drawer toggle
     const mobileBtn = document.getElementById('mobile-menu-btn');
     const mobileDrawer = document.getElementById('mobile-drawer');
     if (mobileBtn && mobileDrawer) {
-      mobileBtn.addEventListener('click', function () {
+      mobileBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
         const open = mobileDrawer.classList.toggle('open');
         mobileBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
       });
     }
 
-    // Filter buttons — Experience
-    document.querySelectorAll('[data-exp-filter]').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        expState.filter = btn.getAttribute('data-exp-filter');
+    // Single delegated click handler (immune to re-renders & language switches)
+    document.addEventListener('click', function (e) {
+      // Close mobile drawer when clicking outside it
+      if (mobileDrawer && mobileDrawer.classList.contains('open')) {
+        if (!e.target.closest('#mobile-drawer') && !e.target.closest('#mobile-menu-btn')) {
+          closeMobileDrawer();
+        }
+      }
+
+      // Language switcher (Desktop & Mobile)
+      const langBtn = e.target.closest('[data-lang-opt]');
+      if (langBtn) {
+        setLanguage(langBtn.getAttribute('data-lang-opt'), true);
+        return;
+      }
+
+      // Theme switcher (Desktop & Mobile)
+      const themeBtn = e.target.closest('[data-theme-opt]');
+      if (themeBtn) {
+        applyTheme(themeBtn.getAttribute('data-theme-opt'), true);
+        return;
+      }
+
+      // Experience filter buttons
+      const expFilterBtn = e.target.closest('[data-exp-filter]');
+      if (expFilterBtn) {
+        expState.filter = expFilterBtn.getAttribute('data-exp-filter');
         expState.photoIdx = 0;
         document.querySelectorAll('[data-exp-filter]').forEach(function (b) {
-          b.classList.toggle('active', b === btn);
+          b.classList.toggle('active', b === expFilterBtn);
         });
-        renderExperienceView();
-      });
-    });
+        renderExperienceView(true);
+        return;
+      }
 
-    // Filter buttons — Projects
-    document.querySelectorAll('[data-prj-filter]').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        prjState.filter = btn.getAttribute('data-prj-filter');
+      // Project filter buttons
+      const prjFilterBtn = e.target.closest('[data-prj-filter]');
+      if (prjFilterBtn) {
+        prjState.filter = prjFilterBtn.getAttribute('data-prj-filter');
         prjState.photoIdx = 0;
         document.querySelectorAll('[data-prj-filter]').forEach(function (b) {
-          b.classList.toggle('active', b === btn);
+          b.classList.toggle('active', b === prjFilterBtn);
         });
-        renderProjectsView();
-      });
-    });
+        renderProjectsView(true);
+        return;
+      }
 
-    // Filter buttons — Certificates
-    document.querySelectorAll('[data-cert-filter]').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        certFilter = btn.getAttribute('data-cert-filter');
+      // Certificate filter buttons
+      const certFilterBtn = e.target.closest('[data-cert-filter]');
+      if (certFilterBtn) {
+        certFilter = certFilterBtn.getAttribute('data-cert-filter');
         document.querySelectorAll('[data-cert-filter]').forEach(function (b) {
-          b.classList.toggle('active', b === btn);
+          b.classList.toggle('active', b === certFilterBtn);
         });
         renderCertificatesView();
-      });
-    });
+        return;
+      }
 
-    // Global delegated clicks
-    document.addEventListener('click', function (e) {
+      // Multi-layer navigation & highlight jumps
       const navLink = e.target.closest('[data-nav-view], [data-jump-view]');
       if (navLink) {
         const view = navLink.getAttribute('data-nav-view') || navLink.getAttribute('data-jump-view');
@@ -817,7 +896,7 @@
           document.querySelectorAll('[data-exp-filter]').forEach(function (b) {
             b.classList.toggle('active', b.getAttribute('data-exp-filter') === 'all');
           });
-          renderExperienceView();
+          renderExperienceView(false);
         } else if (view === 'projects' && jumpId) {
           prjState.filter = 'all';
           prjState.selectedId = jumpId;
@@ -825,92 +904,97 @@
           document.querySelectorAll('[data-prj-filter]').forEach(function (b) {
             b.classList.toggle('active', b.getAttribute('data-prj-filter') === 'all');
           });
-          renderProjectsView();
+          renderProjectsView(false);
         }
         navigateTo(view, true);
         return;
       }
 
+      // Experience item select
       const expBtn = e.target.closest('[data-select-exp]');
       if (expBtn) {
-        expState.selectedId = expBtn.getAttribute('data-select-exp');
-        expState.photoIdx = 0;
-        renderExperienceView();
-        return;
-      }
-
-      const expPhotoBtn = e.target.closest('[data-exp-photo]');
-      if (expPhotoBtn) {
-        expState.photoIdx = Number(expPhotoBtn.getAttribute('data-exp-photo'));
-        renderExperienceView();
-        return;
-      }
-
-      const expStepBtn = e.target.closest('[data-exp-step]');
-      if (expStepBtn) {
-        const active = EXPERIENCES.find(function (x) { return x.id === expState.selectedId; });
-        if (active) {
-          const delta = Number(expStepBtn.getAttribute('data-exp-step'));
-          expState.photoIdx = (expState.photoIdx + delta + active.photos.length) % active.photos.length;
-          renderExperienceView();
+        const nextId = expBtn.getAttribute('data-select-exp');
+        if (nextId !== expState.selectedId) {
+          expState.selectedId = nextId;
+          expState.photoIdx = 0;
+          renderExperienceView(true);
         }
         return;
       }
 
+      // Experience photo select (in-place, zero flicker)
+      const expPhotoBtn = e.target.closest('[data-exp-photo]');
+      if (expPhotoBtn) {
+        expState.photoIdx = Number(expPhotoBtn.getAttribute('data-exp-photo'));
+        updateExpPhotoStage();
+        return;
+      }
+
+      // Experience photo prev/next (in-place, zero flicker)
+      const expStepBtn = e.target.closest('[data-exp-step]');
+      if (expStepBtn) {
+        const active = EXPERIENCES.find(function (x) { return x.id === expState.selectedId; });
+        if (active && active.photos.length) {
+          const delta = Number(expStepBtn.getAttribute('data-exp-step'));
+          expState.photoIdx = (expState.photoIdx + delta + active.photos.length) % active.photos.length;
+          updateExpPhotoStage();
+        }
+        return;
+      }
+
+      // Experience Lightbox open
       const expLbBtn = e.target.closest('[data-open-exp-lb]');
       if (expLbBtn) {
         const active = EXPERIENCES.find(function (x) { return x.id === expState.selectedId; });
         if (active) {
-          openLightbox({
-            mode: 'exp',
-            recordId: active.id,
-            items: active.photos,
-            index: expState.photoIdx
-          });
+          openLightbox({ mode: 'exp', recordId: active.id, items: active.photos, index: expState.photoIdx });
         }
         return;
       }
 
+      // Project item select
       const prjBtn = e.target.closest('[data-select-prj]');
       if (prjBtn) {
-        prjState.selectedId = prjBtn.getAttribute('data-select-prj');
-        prjState.photoIdx = 0;
-        renderProjectsView();
+        const nextId = prjBtn.getAttribute('data-select-prj');
+        if (nextId !== prjState.selectedId) {
+          prjState.selectedId = nextId;
+          prjState.photoIdx = 0;
+          renderProjectsView(true);
+        }
         return;
       }
 
+      // Project photo select (in-place, zero flicker)
       const prjPhotoBtn = e.target.closest('[data-prj-photo]');
       if (prjPhotoBtn) {
         prjState.photoIdx = Number(prjPhotoBtn.getAttribute('data-prj-photo'));
-        renderProjectsView();
+        updatePrjPhotoStage();
         return;
       }
 
+      // Project photo prev/next (in-place, zero flicker)
       const prjStepBtn = e.target.closest('[data-prj-step]');
       if (prjStepBtn) {
         const active = PROJECTS.find(function (x) { return x.id === prjState.selectedId; });
-        if (active) {
+        if (active && active.photos.length) {
           const delta = Number(prjStepBtn.getAttribute('data-prj-step'));
           prjState.photoIdx = (prjState.photoIdx + delta + active.photos.length) % active.photos.length;
-          renderProjectsView();
+          updatePrjPhotoStage();
         }
         return;
       }
 
+      // Project Lightbox open
       const prjLbBtn = e.target.closest('[data-open-prj-lb]');
       if (prjLbBtn) {
         const active = PROJECTS.find(function (x) { return x.id === prjState.selectedId; });
         if (active) {
-          openLightbox({
-            mode: 'prj',
-            recordId: active.id,
-            items: active.photos,
-            index: prjState.photoIdx
-          });
+          openLightbox({ mode: 'prj', recordId: active.id, items: active.photos, index: prjState.photoIdx });
         }
         return;
       }
 
+      // Certificate Lightbox open (Next/Prev across active filtered list)
       const certCard = e.target.closest('[data-open-cert-idx]');
       if (certCard) {
         const filtered = getFilteredCertificates();
@@ -922,6 +1006,7 @@
         return;
       }
 
+      // Lightbox thumbnail jump
       const lbJump = e.target.closest('[data-lb-jump]');
       if (lbJump) {
         lbState.index = Number(lbJump.getAttribute('data-lb-jump'));
@@ -929,23 +1014,25 @@
         return;
       }
 
+      // Copy email
       const copyBtn = e.target.closest('[data-copy-text]');
       if (copyBtn) {
         copyToClipboard(copyBtn.getAttribute('data-copy-text'), copyBtn);
         return;
       }
 
+      // CV modal open
       if (e.target.closest('[data-open-cv]')) {
         openCvModal();
       }
     });
 
-    // Lightbox controls & backdrop close
-    document.getElementById('lb-prev').addEventListener('click', function () { stepLightbox(-1); });
-    document.getElementById('lb-next').addEventListener('click', function () { stepLightbox(1); });
-    document.getElementById('lb-close').addEventListener('click', closeLightbox);
-    document.getElementById('lightbox-modal').addEventListener('click', function (e) {
-      if (e.target === this) closeLightbox();
+    // Modal controls (null-safe)
+    onId('lb-prev', 'click', function () { stepLightbox(-1); });
+    onId('lb-next', 'click', function () { stepLightbox(1); });
+    onId('lb-close', 'click', function () { closeLightbox(true); });
+    onId('lightbox-modal', 'click', function (e) {
+      if (e.target === this) closeLightbox(true);
     });
 
     // Swipe in Lightbox
@@ -963,21 +1050,23 @@
       }, { passive: true });
     }
 
-    // CV Modal controls
-    document.getElementById('cv-close').addEventListener('click', closeCvModal);
-    document.getElementById('cv-close-foot').addEventListener('click', closeCvModal);
-    document.getElementById('cv-download-json').addEventListener('click', downloadProfileJson);
-    document.getElementById('cv-modal').addEventListener('click', function (e) {
+    onId('cv-close', 'click', closeCvModal);
+    onId('cv-close-foot', 'click', closeCvModal);
+    onId('cv-download-json', 'click', downloadProfileJson);
+    onId('cv-modal', 'click', function (e) {
       if (e.target === this) closeCvModal();
     });
 
-    // Keyboard shortcuts (Esc / Left / Right)
+    // Global keyboard shortcuts (Escape / ArrowLeft / ArrowRight)
     document.addEventListener('keydown', function (e) {
-      const lbOpen = document.getElementById('lightbox-modal').classList.contains('open');
-      const cvOpen = document.getElementById('cv-modal').classList.contains('open');
+      const lbModal = document.getElementById('lightbox-modal');
+      const cvModal = document.getElementById('cv-modal');
+      const lbOpen = lbModal && lbModal.classList.contains('open');
+      const cvOpen = cvModal && cvModal.classList.contains('open');
       if (e.key === 'Escape') {
-        if (lbOpen) closeLightbox();
+        if (lbOpen) closeLightbox(true);
         if (cvOpen) closeCvModal();
+        closeMobileDrawer();
       } else if (lbOpen) {
         if (e.key === 'ArrowRight') stepLightbox(1);
         if (e.key === 'ArrowLeft') stepLightbox(-1);
