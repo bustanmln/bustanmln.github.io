@@ -397,7 +397,7 @@ window.PORTFOLIO_I18N = {
       },
       tags: ['IoT Systems', 'Lab Coordination', 'Applied Research', 'ESP32 / Arduino', 'Runtime Integration'],
       links: [
-        { label: 'Elitia / I-IoT Lab', url: 'https://www.instagram.com/elitia_laboratory' }
+        { label: '@iris__laboratory', url: 'https://www.instagram.com/iris__laboratory?utm_source=ig_web_button_share_sheet&lqvp=ZDNlZDc0MzIxNw==' }
       ],
       photos: [
         {
