@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme-mode="system" data-resolved-theme="light">
+<html lang="en" data-theme-mode="light" data-resolved-theme="light">
 
 <head>
   <meta charset="UTF-8" />
@@ -43,8 +43,9 @@
 </head>
 
 <body>
-  <!-- Subtle GPU-Composited Technical Drafting Grid -->
-  <div id="tech-grid-bg" class="tech-grid-bg" aria-hidden="true"></div>
+  <!-- 2-Layer Living Monochrome Background: Subtle Ambient Gallery Lighting + Kinetic Architectural Field -->
+  <div id="ambient-canvas-bg" class="ambient-canvas-bg" aria-hidden="true"></div>
+  <canvas id="kinetic-bg-canvas" class="kinetic-bg-canvas" aria-hidden="true"></canvas>
 
   <!-- ================= PERSISTENT FULL-WIDTH HEADER ================= -->
   <header class="site-header">
@@ -80,7 +81,7 @@
 
         <!-- Theme Switcher -->
         <div class="theme-switch" role="radiogroup" aria-label="Theme preference">
-          <button type="button" class="theme-btn" role="radio" data-theme-opt="light" aria-checked="false" aria-label="Light mode" title="Light mode">
+          <button type="button" class="theme-btn" role="radio" data-theme-opt="light" aria-checked="true" aria-label="Light mode" title="Light mode">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <circle cx="12" cy="12" r="5"></circle>
               <line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line>
@@ -94,7 +95,7 @@
               <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
             </svg>
           </button>
-          <button type="button" class="theme-btn" role="radio" data-theme-opt="system" aria-checked="true" aria-label="System theme" title="Follow system theme">
+          <button type="button" class="theme-btn" role="radio" data-theme-opt="system" aria-checked="false" aria-label="System theme" title="Follow system theme">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
               <line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line>
@@ -130,7 +131,7 @@
       <li><a href="#experience" data-nav-view="experience" class="mobile-nav-link"><span data-i18n="mobile.experience">Experience &amp; Field Work</span><span class="mono">01</span></a></li>
       <li><a href="#projects" data-nav-view="projects" class="mobile-nav-link"><span data-i18n="mobile.projects">Projects Showcase</span><span class="mono">02</span></a></li>
       <li><a href="#certificates" data-nav-view="certificates" class="mobile-nav-link"><span data-i18n="mobile.certificates">Official Certificates (13)</span><span class="mono">03</span></a></li>
-      <li><a href="#contact" data-nav-view="contact" class="mobile-nav-link"><span data-i18n="mobile.contact">Contact Channels</span><span class="mono">04</span></a></li>
+      <li><a href="#contact" data-nav-view="contact" class="mobile-nav-link"><span data-i18n="mobile.contact">Contact</span><span class="mono">04</span></a></li>
       <li><button type="button" class="mobile-nav-link" style="width:100%;" data-open-cv><span data-i18n="home.cta.cv">CV Summary</span><span class="mono">CV</span></button></li>
     </ul>
     <div class="mobile-drawer-foot mobile-controls-row">
@@ -146,13 +147,13 @@
       <div class="mobile-control-group">
         <span class="mono" style="font-size:11px; color:var(--ink-muted);" data-i18n="mobile.theme">THEME</span>
         <div class="theme-switch" style="display:inline-flex;" role="radiogroup" aria-label="Mobile theme preference">
-          <button type="button" class="theme-btn" role="radio" data-theme-opt="light" aria-checked="false" aria-label="Light mode">
+          <button type="button" class="theme-btn" role="radio" data-theme-opt="light" aria-checked="true" aria-label="Light mode">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line></svg>
           </button>
           <button type="button" class="theme-btn" role="radio" data-theme-opt="dark" aria-checked="false" aria-label="Dark mode">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
           </button>
-          <button type="button" class="theme-btn" role="radio" data-theme-opt="system" aria-checked="true" aria-label="System theme">
+          <button type="button" class="theme-btn" role="radio" data-theme-opt="system" aria-checked="false" aria-label="System theme">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
           </button>
         </div>
@@ -171,11 +172,6 @@
         <!-- Asymmetric Gallery Wall Hero on Seamless Studio Canvas (#eeeeee) -->
         <div class="gallery-hero">
           <div class="hero-statement-block stagger-item" style="--stagger-i:0">
-            <div class="status-strip">
-              <span class="status-dot" aria-hidden="true"></span>
-              <span data-i18n="home.status">OPEN FOR INDUSTRIAL AUTOMATION, INSTRUMENTATION &amp; IOT ROLES</span>
-            </div>
-
             <h1 class="hero-headline">
               <span data-i18n="home.headline.pre">Industrial Automation, </span><span class="headline-subdued" data-i18n="home.headline.accent">Embedded IoT</span><span data-i18n="home.headline.post"> &amp; Applied AI.</span>
             </h1>
@@ -241,19 +237,11 @@
           </div>
         </div>
 
-        <!-- 00.1 Engineer Dossier + Telemetry KPIs + Dark Feature Pillars -->
+        <!-- Engineer Profile Dossier + Portfolio Metrics + Core Engineering Pillars -->
         <div class="home-split home-subblock">
-          <!-- Left Sticky Column: Engineer Identification Dossier -->
+          <!-- Left Sticky Column: Engineer Profile Card -->
           <aside class="dossier-col" aria-label="Engineer Profile Dossier">
             <div class="dossier-card stagger-item" style="--stagger-i:2">
-              <div class="dossier-telemetry">
-                <span style="display:inline-flex; align-items:center; gap:0.45rem;">
-                  <span class="status-dot" aria-hidden="true"></span>
-                  <span>SYS // ONLINE</span>
-                </span>
-                <span data-wib-clock>00:00:00 WIB</span>
-              </div>
-
               <div class="dossier-head">
                 <div class="portrait-box">
                   <img src="images/profile/foto_profil.jpg" alt="Portrait of Bustan Nabiel Maulana" />
@@ -289,7 +277,6 @@
               </div>
 
               <div class="dossier-foot">
-                <span class="mono" style="font-size:11px; color:var(--ink-muted);" data-i18n="dossier.channels">DIRECT CHANNELS</span>
                 <div class="social-icon-row">
                   <a class="icon-chip" href="mailto:bustanmaulana50@gmail.com" aria-label="Email Bustan" title="bustanmaulana50@gmail.com">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
@@ -331,18 +318,17 @@
               </div>
             </div>
 
-            <!-- 00.1 Core Competency Pillars (Studio.Design Charcoal Dark Feature Panel) -->
-            <div class="stagger-item" style="--stagger-i:3">
+            <!-- Core Competency Pillars -->
+            <div class="stagger-item scroll-reveal" style="--stagger-i:3">
               <div class="subblock-head">
                 <h2 class="subblock-title editorial-heading" data-i18n="pillars.title">Core Engineering Pillars</h2>
-                <span class="mono" style="font-size:11px; color:var(--ink-muted);" data-i18n="pillars.code">00.1 // DISCIPLINE MATRIX</span>
               </div>
 
               <div class="pillars-grid dark-feature-panel">
                 <div class="pillar-card">
                   <div>
                     <div class="pillar-head">
-                      <span class="eyebrow eyebrow-inverse" data-i18n="pillars.c1.eyebrow">CH-01 // INDUSTRIAL</span>
+                      <span class="eyebrow eyebrow-inverse" data-i18n="pillars.c1.eyebrow">01 · Industrial</span>
                       <span class="pillar-icon" aria-hidden="true">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
                       </span>
@@ -360,7 +346,7 @@
                 <div class="pillar-card">
                   <div>
                     <div class="pillar-head">
-                      <span class="eyebrow eyebrow-inverse" data-i18n="pillars.c2.eyebrow">CH-02 // EMBEDDED</span>
+                      <span class="eyebrow eyebrow-inverse" data-i18n="pillars.c2.eyebrow">02 · Embedded</span>
                       <span class="pillar-icon" aria-hidden="true">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="14" x2="23" y2="14"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="14" x2="4" y2="14"></line></svg>
                       </span>
@@ -378,7 +364,7 @@
                 <div class="pillar-card">
                   <div>
                     <div class="pillar-head">
-                      <span class="eyebrow eyebrow-inverse" data-i18n="pillars.c3.eyebrow">CH-03 // APPLIED AI</span>
+                      <span class="eyebrow eyebrow-inverse" data-i18n="pillars.c3.eyebrow">03 · Applied AI</span>
                       <span class="pillar-icon" aria-hidden="true">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                       </span>
@@ -397,11 +383,10 @@
           </div>
         </div>
 
-        <!-- 00.2 Full-Width Black Showcase Highlights (Edge-to-Edge 0px Padded Visuals, 8px Radius, No Shadow) -->
-        <div class="home-subblock stagger-item" style="--stagger-i:4">
+        <!-- Full-Width Black Showcase Highlights -->
+        <div class="home-subblock stagger-item scroll-reveal" style="--stagger-i:4">
           <div class="subblock-head">
             <h2 class="subblock-title editorial-heading" data-i18n="highlights.title">Selected Highlights</h2>
-            <span class="mono" style="font-size:11px; color:var(--ink-muted);" data-i18n="highlights.code">00.2 // DIRECT LAYER SHORTCUTS</span>
           </div>
 
           <div class="highlights-grid">
@@ -459,7 +444,7 @@
         <div class="layer-header stagger-item" style="--stagger-i:0">
           <div class="layer-header-row">
             <div>
-              <span class="eyebrow" data-i18n="exp.eyebrow">01 // FIELD WORK, LABORATORIES &amp; LEADERSHIP</span>
+              <span class="eyebrow" data-i18n="exp.eyebrow">01 · Field Work, Laboratories &amp; Leadership</span>
               <h2 class="layer-title" data-i18n="exp.title">Experience Deck</h2>
               <p class="layer-subtitle" data-i18n="exp.subtitle">
                 Select any role on the left to inspect verified technical scope, field documentation, and full multi-photo galleries (32 authentic photos across 5 folders).
@@ -488,7 +473,7 @@
         <div class="layer-header stagger-item" style="--stagger-i:0">
           <div class="layer-header-row">
             <div>
-              <span class="eyebrow" data-i18n="prj.eyebrow">02 // HARDWARE, IOT, ROBOTICS &amp; AI BUILDS</span>
+              <span class="eyebrow" data-i18n="prj.eyebrow">02 · Hardware, IoT, Robotics &amp; AI</span>
               <h2 class="layer-title" data-i18n="prj.title">Engineering Projects Showcase</h2>
               <p class="layer-subtitle" data-i18n="prj.subtitle">
                 Select a project from the directory to review its engineering problem context, system architecture, specifications, and complete hardware documentation gallery (17 authentic photos).
@@ -507,7 +492,6 @@
         <div id="prj-bento" class="projects-bento-grid stagger-item" style="--stagger-i:1" aria-label="Projects Bento Grid"></div>
 
         <div class="bento-hint-bar stagger-item" style="--stagger-i:2">
-          <span class="status-dot" aria-hidden="true"></span>
           <span data-i18n="prj.bentoHint">Select any project card above to inspect its full engineering datasheet &amp; photo gallery below.</span>
         </div>
 
@@ -522,7 +506,7 @@
         <div class="layer-header stagger-item" style="--stagger-i:0">
           <div class="layer-header-row">
             <div>
-              <span class="eyebrow" data-i18n="cert.eyebrow">03 // VERIFIED CREDENTIALS REGISTRY</span>
+              <span class="eyebrow" data-i18n="cert.eyebrow">03 · Verified Credentials</span>
               <h2 class="layer-title" data-i18n="cert.title">Official Certificates (13)</h2>
               <p class="layer-subtitle" data-i18n="cert.subtitle">
                 Filter by domain and select any credential card to inspect full-resolution artwork, credential ID, issuer metadata, and browse Next/Prev inside the lightbox modal.
@@ -542,15 +526,15 @@
       </section>
 
       <!-- ===============================================================
-           LAYER 04: CONTACT (FULL-WIDTH OFFICIAL SVG CHANNELS)
+           LAYER 04: CONTACT (FULL-WIDTH OFFICIAL SVG LINKS)
            =============================================================== -->
-      <section id="view-contact" class="view-layer" aria-label="Contact Channels">
+      <section id="view-contact" class="view-layer" aria-label="Contact">
         <div class="layer-header stagger-item" style="--stagger-i:0">
           <div>
-            <span class="eyebrow" data-i18n="contact.eyebrow">04 // DIRECT ENGINEERING CHANNELS</span>
+            <span class="eyebrow" data-i18n="contact.eyebrow">04 · Direct Contact</span>
             <h2 class="layer-title" data-i18n="contact.title">Contact &amp; Collaboration</h2>
             <p class="layer-subtitle" data-i18n="contact.subtitle">
-              Reach out directly via official channels for industrial automation, instrumentation, embedded IoT, or applied AI engineering opportunities.
+              Reach out directly for industrial automation, instrumentation, embedded IoT, or applied AI engineering opportunities.
             </p>
           </div>
         </div>
@@ -653,11 +637,6 @@
 
           <!-- Availability & Dossier Panel -->
           <aside class="availability-panel interactive-card" aria-label="Availability Details">
-            <div class="status-pill" style="align-self:flex-start;">
-              <span class="status-dot" aria-hidden="true"></span>
-              <span data-i18n="contact.avail.pill">AVAILABLE FOR OPPORTUNITIES</span>
-            </div>
-
             <h3 data-i18n="contact.avail.title">Location &amp; Role Readiness</h3>
             <p data-i18n-html="contact.avail.desc.html">
               Based in <strong>Bandung &amp; Tuban, Indonesia</strong> (UTC+7 / WIB). Open to graduate engineering roles,
@@ -666,10 +645,6 @@
 
             <table class="spec-table">
               <tbody>
-                <tr>
-                  <th data-i18n="contact.avail.time">Local Time</th>
-                  <td data-wib-clock>00:00:00 WIB</td>
-                </tr>
                 <tr>
                   <th data-i18n="contact.avail.inst">Institution</th>
                   <td data-i18n="contact.avail.instVal">Telkom University (S.T. Electrical Engineering)</td>
@@ -734,11 +709,6 @@
         <a href="#certificates" data-nav-view="certificates" data-i18n="nav.certificates">Certificates</a>
         <a href="#contact" data-nav-view="contact" data-i18n="nav.contact">Contact</a>
       </div>
-
-      <span class="clock-pill">
-        <span class="status-dot" aria-hidden="true"></span>
-        <span data-wib-clock>00:00:00 WIB</span>
-      </span>
     </div>
   </footer>
 

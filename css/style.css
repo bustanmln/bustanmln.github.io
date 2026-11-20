@@ -41,9 +41,7 @@
   --accent-soft: #e2e2e2;
   --accent-border: #b8b8b8;
   --spotlight-color: rgba(34, 34, 34, 0.045);
-  --status-ok: var(--color-charcoal-ink);
   --nav-bg: rgba(238, 238, 238, 0.92);
-  --grid-line: rgba(34, 34, 34, 0.032);
 
   /* Studio.Design Elevation (Hover Lift ONLY on prominent buttons) */
   --shadow-lift: 0px 2px 15px 0px rgba(0, 0, 0, 0.1);
@@ -93,9 +91,7 @@ html.dark {
   --accent-soft: #262626;
   --accent-border: #404040;
   --spotlight-color: rgba(255, 255, 255, 0.05);
-  --status-ok: #f3f3f3;
   --nav-bg: rgba(17, 17, 17, 0.92);
-  --grid-line: rgba(255, 255, 255, 0.03);
   --shadow-lift: 0px 2px 15px 0px rgba(0, 0, 0, 0.45);
   --shadow-modal: 0px 20px 52px -12px rgba(0, 0, 0, 0.72);
 }
@@ -126,19 +122,49 @@ body {
   position: relative;
 }
 
-/* Subtle Architectural Canvas Grid (GPU-Composited) */
-.tech-grid-bg {
+/* ==========================================================================
+   2-Layer Living Monochrome Background (Ambient Gallery Lighting + Kinetic Field)
+   ========================================================================== */
+.ambient-canvas-bg {
   position: fixed;
-  inset: -24px;
+  inset: -14%;
   z-index: 0;
   pointer-events: none;
-  background-image:
-    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
-  background-size: 40px 40px;
-  transform: translate3d(var(--grid-x, 0px), var(--grid-y, 0px), 0);
-  transition: transform 0.4s var(--ease-out-expo);
+  background:
+    radial-gradient(62% 54% at 18% 20%, rgba(255, 255, 255, 0.78) 0%, rgba(255, 255, 255, 0) 68%),
+    radial-gradient(58% 52% at 84% 78%, rgba(216, 216, 216, 0.62) 0%, rgba(238, 238, 238, 0) 70%),
+    radial-gradient(48% 46% at 54% 44%, rgba(255, 255, 255, 0.42) 0%, rgba(238, 238, 238, 0) 65%);
+  animation: ambientGalleryLight 26s ease-in-out infinite alternate;
   will-change: transform;
+}
+
+html.dark .ambient-canvas-bg {
+  background:
+    radial-gradient(62% 54% at 18% 20%, rgba(44, 44, 44, 0.52) 0%, rgba(17, 17, 17, 0) 68%),
+    radial-gradient(58% 52% at 84% 78%, rgba(30, 30, 30, 0.48) 0%, rgba(17, 17, 17, 0) 70%),
+    radial-gradient(48% 46% at 54% 44%, rgba(38, 38, 38, 0.34) 0%, rgba(17, 17, 17, 0) 65%);
+}
+
+@keyframes ambientGalleryLight {
+  0% {
+    transform: translate3d(-2.2%, -1.6%, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(2.4%, 1.2%, 0) scale(1.04);
+  }
+  100% {
+    transform: translate3d(-1.4%, 2.2%, 0) scale(1.01);
+  }
+}
+
+.kinetic-bg-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  display: block;
 }
 
 .site-header,
@@ -687,7 +713,7 @@ a:focus-visible,
 }
 
 /* ==========================================================================
-   Multi-Layer SPA Stage & Clean Editorial Transitions (Zero Stuck Opacity)
+   Multi-Layer SPA Stage, Exit/Enter Choreography & Scroll-Triggered Depth
    ========================================================================== */
 .main-stage {
   flex: 1 0 auto;
@@ -698,8 +724,37 @@ a:focus-visible,
   display: none;
 }
 
+.view-layer.leaving {
+  display: block;
+  pointer-events: none;
+  animation: layerExit 0.16s var(--ease-out-expo) forwards;
+}
+
 .view-layer.active {
   display: block;
+  animation: layerEnter 0.36s var(--ease-out-expo) both;
+}
+
+@keyframes layerExit {
+  from {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(0, -8px, 0);
+  }
+}
+
+@keyframes layerEnter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 @keyframes staggerReveal {
@@ -715,7 +770,37 @@ a:focus-visible,
 
 .view-layer.active .stagger-item {
   animation: staggerReveal 0.42s var(--ease-out-expo) both;
-  animation-delay: calc(var(--stagger-i, 0) * 55ms);
+  animation-delay: calc(var(--stagger-i, 0) * 48ms);
+}
+
+/* Fast Staggered Cascade for Dynamically Rendered Cards (Zero Stuck Opacity) */
+@keyframes cardCascade {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.cascade-card {
+  animation: cardCascade 0.34s var(--ease-out-expo) both;
+  animation-delay: calc(var(--card-i, 0) * 42ms);
+}
+
+/* Below-the-Fold Scroll Depth Reveal (Strictly Below Fold + Safe Fallback) */
+.scroll-reveal.reveal-pending {
+  opacity: 0;
+  transform: translate3d(0, 16px, 0);
+  animation: none !important;
+}
+
+.scroll-reveal.is-revealed {
+  opacity: 1;
+  transform: none;
+  transition: opacity 0.48s var(--ease-out-expo), transform 0.48s var(--ease-out-expo);
 }
 
 .layer-header {
@@ -840,54 +925,6 @@ a:focus-visible,
   border: 1px solid rgba(255, 255, 255, 0.16);
 }
 
-/* Quiet Monochrome Status Strip (Zero Pill Radius) */
-.status-strip,
-.status-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6rem;
-  padding: 0.38rem 0.78rem;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  font-family: var(--font-mono);
-  font-size: clamp(10px, 0.2vw + 9.5px, 11px);
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  color: var(--ink);
-  max-width: 100%;
-}
-
-.status-dot {
-  position: relative;
-  width: 7px;
-  height: 7px;
-  border-radius: 2px;
-  background: var(--status-ok);
-  flex-shrink: 0;
-}
-
-.status-dot::after {
-  content: '';
-  position: absolute;
-  inset: -4px;
-  border-radius: 3px;
-  border: 1.5px solid var(--status-ok);
-  opacity: 0;
-  animation: telemetryPulse 2.6s var(--ease-out-expo) infinite;
-}
-
-@keyframes telemetryPulse {
-  0% {
-    transform: scale(0.75);
-    opacity: 0.65;
-  }
-  70%, 100% {
-    transform: scale(1.85);
-    opacity: 0;
-  }
-}
-
 /* ==========================================================================
    LAYER 00: #home — Studio.Design "GALLERY WALL IN MOTION" Asymmetric Hero
    ========================================================================== */
@@ -908,7 +945,7 @@ a:focus-visible,
 
 /* Studio.Design Hero Display: Inter up to 80px/600, 1.0 line-height, -0.04em (-3.2px) tracking */
 .hero-headline {
-  margin: 1.15rem 0 0;
+  margin: 0;
   font-family: var(--font-display);
   font-size: clamp(2.45rem, 5.1vw, 5rem);
   font-weight: 600;
@@ -1152,29 +1189,9 @@ a.kpi-cell:hover .kpi-label {
 .dossier-card {
   background: var(--surface);
   border: 1px solid var(--border);
+  border-top: 3px solid var(--ink);
   border-radius: var(--radius-lg);
   overflow: hidden;
-}
-
-.dossier-telemetry {
-  padding: 0.65rem 1.25rem;
-  background: var(--surface-charcoal);
-  color: #f3f3f3;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-  font-family: var(--font-mono);
-  font-size: 10.5px;
-  font-weight: 600;
-}
-
-.dossier-telemetry .status-dot {
-  background: #ffffff;
-}
-
-.dossier-telemetry .status-dot::after {
-  border-color: #ffffff;
 }
 
 .dossier-head {
@@ -1280,7 +1297,7 @@ a.kpi-cell:hover .kpi-label {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 0.65rem;
 }
 
@@ -2333,42 +2350,29 @@ html.dark .dir-card.active .dir-sub {
   opacity: 0.62;
 }
 
-.clock-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.34rem 0.72rem;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  color: var(--ink);
-  font-family: var(--font-mono);
-  font-size: 11.5px;
-  border-radius: var(--radius-md);
-}
-
 /* ==========================================================================
-   Modals (Touch-Friendly Lightbox & CV Summary)
+   Modals (Smooth Backdrop Fade + Panel Scale-In/Out Transitions)
    ========================================================================== */
 .modal-backdrop {
   position: fixed;
   inset: 0;
   z-index: 200;
-  background: rgba(0, 0, 0, 0.84);
+  background: rgba(0, 0, 0, 0.82);
   backdrop-filter: blur(6px);
-  display: none;
+  display: flex;
   align-items: center;
   justify-content: center;
   padding: clamp(0.5rem, 2vw, 1.5rem);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.24s var(--ease-out-expo), visibility 0.24s var(--ease-out-expo);
 }
 
 .modal-backdrop.open {
-  display: flex;
-  animation: modalFade 0.2s ease both;
-}
-
-@keyframes modalFade {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
 }
 
 .modal-panel {
@@ -2381,18 +2385,14 @@ html.dark .dir-card.active .dir-sub {
   flex-direction: column;
   overflow: hidden;
   box-shadow: var(--shadow-modal);
-  animation: modalRise 0.28s var(--ease-out-expo) both;
+  opacity: 0;
+  transform: translate3d(0, 14px, 0) scale(0.965);
+  transition: opacity 0.28s var(--ease-out-expo), transform 0.28s var(--ease-out-expo);
 }
 
-@keyframes modalRise {
-  from {
-    opacity: 0;
-    transform: translate3d(0, 12px, 0) scale(0.985);
-  }
-  to {
-    opacity: 1;
-    transform: translate3d(0, 0, 0) scale(1);
-  }
+.modal-backdrop.open .modal-panel {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1);
 }
 
 .modal-panel.narrow {
@@ -2874,7 +2874,7 @@ html.dark .dir-card.active .dir-sub {
   }
 }
 
-/* Reduced Motion Accessibility — Disables Parallax, Float-In & Stagger Animations */
+/* Reduced Motion Accessibility — Disables Parallax, Kinetic Loop, Ambient Shift & Stagger */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -2884,12 +2884,14 @@ html.dark .dir-card.active .dir-sub {
     transition-duration: 0.01ms !important;
   }
 
-  .tech-grid-bg,
+  .ambient-canvas-bg,
   .mosaic-parallax {
     transform: none !important;
+    animation: none !important;
   }
 
-  .status-dot::after {
-    display: none;
+  .scroll-reveal.reveal-pending {
+    opacity: 1 !important;
+    transform: none !important;
   }
 }

@@ -185,14 +185,31 @@
   }
 
   /* ------------------------------------------------------------------------
-     Multi-Layer SPA Router (#home, #experience, #projects, #certificates, #contact)
+     Multi-Layer SPA Router with Exit/Enter Choreography & Kinetic Impulse
      ------------------------------------------------------------------------ */
   const VALID_VIEWS = ['home', 'experience', 'projects', 'certificates', 'contact'];
+  let activeView = null;
+  let navTransitionTimer = null;
+  let navToken = 0;
 
   function resolveViewFromHash(rawHash) {
     const cleaned = (rawHash || '').replace(/^#/, '').trim().toLowerCase();
     if (cleaned === 'about') return 'home';
     return VALID_VIEWS.includes(cleaned) ? cleaned : 'home';
+  }
+
+  function applyActiveLayer(target) {
+    VALID_VIEWS.forEach(function (v) {
+      const layer = document.getElementById('view-' + v);
+      if (!layer) return;
+      layer.classList.remove('leaving');
+      layer.classList.toggle('active', v === target);
+    });
+    activeView = target;
+    window.scrollTo(0, 0);
+    const targetLayer = document.getElementById('view-' + target);
+    if (targetLayer) refreshScrollReveals(targetLayer);
+    requestAnimationFrame(updateNavSlider);
   }
 
   function navigateTo(viewId, updateHash) {
@@ -203,11 +220,7 @@
     closeLightbox(false);
     closeCvModal();
 
-    VALID_VIEWS.forEach(function (v) {
-      const layer = document.getElementById('view-' + v);
-      if (layer) layer.classList.toggle('active', v === target);
-    });
-
+    // Update nav indicators & URL hash immediately for crisp 0ms tactile feedback
     document.querySelectorAll('[data-nav-view]').forEach(function (el) {
       const isCurrent = el.getAttribute('data-nav-view') === target;
       el.classList.toggle('active', isCurrent);
@@ -218,9 +231,38 @@
     if (updateHash !== false && window.location.hash !== '#' + target) {
       window.location.hash = target;
     }
-
-    window.scrollTo(0, 0);
     requestAnimationFrame(updateNavSlider);
+
+    // Cancel any in-flight exit transition so rapid clicks never desync or hide layers
+    if (navTransitionTimer) {
+      clearTimeout(navTransitionTimer);
+      navTransitionTimer = null;
+    }
+    const token = ++navToken;
+
+    const prevView = activeView;
+    const prevLayer = prevView ? document.getElementById('view-' + prevView) : null;
+
+    // Initial load, same view, or reduced motion -> instant switch
+    if (!prevView || prevView === target || !prevLayer || prefersReducedMotion) {
+      applyActiveLayer(target);
+      return;
+    }
+
+    // Send directional phase impulse to the kinetic background canvas
+    const prevIdx = VALID_VIEWS.indexOf(prevView);
+    const nextIdx = VALID_VIEWS.indexOf(target);
+    triggerKineticImpulse(nextIdx >= prevIdx ? 1 : -1);
+
+    // Clean exit animation (155ms), then enter choreography on target layer
+    prevLayer.classList.remove('active');
+    prevLayer.classList.add('leaving');
+
+    navTransitionTimer = setTimeout(function () {
+      navTransitionTimer = null;
+      if (token !== navToken) return;
+      applyActiveLayer(target);
+    }, 155);
   }
 
   /* ------------------------------------------------------------------------
@@ -250,6 +292,8 @@
     document.querySelectorAll('[data-theme-opt]').forEach(function (btn) {
       btn.setAttribute('aria-checked', btn.getAttribute('data-theme-opt') === valid ? 'true' : 'false');
     });
+
+    if (typeof syncKineticTheme === 'function') syncKineticTheme();
   }
 
   if (colorQuery.addEventListener) {
@@ -308,10 +352,11 @@
     const currentPhoto = active.photos[expState.photoIdx];
     const photosWord = t('common.photos');
 
-    listEl.innerHTML = filtered.map(function (e) {
+    listEl.innerHTML = filtered.map(function (e, idx) {
       const isAct = e.id === active.id;
+      const cascadeCls = animateEnter ? ' cascade-card' : '';
       return (
-        '<button type="button" class="dir-card interactive-card' + (isAct ? ' active' : '') + '" data-select-exp="' + e.id + '">' +
+        '<button type="button" class="dir-card interactive-card' + cascadeCls + (isAct ? ' active' : '') + '" style="--card-i:' + Math.min(idx, 6) + '" data-select-exp="' + e.id + '">' +
           '<div class="dir-thumb"><img src="' + safeAttrUrl(e.photos[0].src) + '" alt="' + escapeHtml(pick(e.role)) + '" loading="lazy" /></div>' +
           '<div class="dir-meta">' +
             '<div class="dir-top"><span class="dir-code">' + e.code + '</span><span>' + escapeHtml(pick(e.period)) + '</span></div>' +
@@ -424,10 +469,11 @@
     const currentPhoto = active.photos[prjState.photoIdx];
     const photosWord = t('common.photos');
 
-    bentoEl.innerHTML = filtered.map(function (p) {
+    bentoEl.innerHTML = filtered.map(function (p, idx) {
       const isAct = p.id === active.id;
+      const cascadeCls = animateEnter ? ' cascade-card' : '';
       return (
-        '<button type="button" class="bento-prj-card black-showcase-card' + (isAct ? ' active' : '') + '" data-select-prj="' + p.id + '">' +
+        '<button type="button" class="bento-prj-card black-showcase-card' + cascadeCls + (isAct ? ' active' : '') + '" style="--card-i:' + Math.min(idx, 6) + '" data-select-prj="' + p.id + '">' +
           '<div class="bento-prj-thumb">' +
             '<img src="' + safeAttrUrl(p.photos[0].src) + '" alt="' + escapeHtml(p.title) + '" loading="lazy" />' +
             '<span class="bento-prj-badge">' + p.code + '</span>' +
@@ -507,7 +553,7 @@
     return CERTIFICATES.filter(function (c) { return c.category === certFilter; });
   }
 
-  function renderCertificatesView() {
+  function renderCertificatesView(animateCards) {
     const gridEl = document.getElementById('certificates-grid');
     if (!gridEl) return;
 
@@ -523,9 +569,10 @@
       const tag = pick(c.tag);
       const desc = pick(c.desc);
       const isFeatured = certFilter === 'all' && idx === 0;
+      const cascadeCls = animateCards ? ' cascade-card' : '';
 
       return (
-        '<button type="button" class="cert-card interactive-card' + (isFeatured ? ' featured-cert' : '') + '" data-open-cert-idx="' + idx + '" aria-label="' + escapeHtml(hoverLabel + ': ' + title) + '">' +
+        '<button type="button" class="cert-card interactive-card' + cascadeCls + (isFeatured ? ' featured-cert' : '') + '" style="--card-i:' + Math.min(idx, 7) + '" data-open-cert-idx="' + idx + '" aria-label="' + escapeHtml(hoverLabel + ': ' + title) + '">' +
           '<div class="cert-frame">' +
             '<img src="' + safeAttrUrl(c.image) + '" alt="' + escapeHtml(title) + '" loading="lazy" />' +
             '<span class="cert-hover-pill">' + escapeHtml(hoverLabel) + '</span>' +
@@ -741,28 +788,344 @@
   }
 
   /* ------------------------------------------------------------------------
-     Live WIB Clock
+     Interactive Architectural Kinetic Field (HTML5 Canvas, 60fps RAF)
+     - Organic continuous dot-matrix wave + thin monochrome signal contours
+     - Desktop cursor magnetic displacement & wave ripple with lerp damping
+     - Layer-switch directional phase impulse & subtle expanding wave ring
+     - DPR <= 2, ResizeObserver, visibilitychange auto-pause, reduced-motion safe
      ------------------------------------------------------------------------ */
-  function updateWibClocks() {
-    const formatted = new Intl.DateTimeFormat('en-GB', {
-      timeZone: 'Asia/Jakarta',
-      hour12: false,
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit'
-    }).format(new Date()) + ' WIB';
-    document.querySelectorAll('[data-wib-clock]').forEach(function (el) {
-      el.textContent = formatted;
+  const kineticState = {
+    canvas: null,
+    ctx: null,
+    w: 0,
+    h: 0,
+    dpr: 1,
+    rafId: null,
+    running: false,
+    phase: 0,
+    phaseImpulseVel: 0,
+    ringRadius: 0,
+    ringAlpha: 0,
+    ringX: 0,
+    ringY: 0,
+    targetX: -9999,
+    targetY: -9999,
+    curX: -9999,
+    curY: -9999,
+    pointerActive: false,
+    pointerStrength: 0,
+    lastTs: 0,
+    isDark: false
+  };
+
+  function syncKineticTheme() {
+    kineticState.isDark = document.documentElement.classList.contains('dark');
+    if (prefersReducedMotion && kineticState.ctx) {
+      drawKineticFrame(0);
+    }
+  }
+
+  function triggerKineticImpulse(direction) {
+    if (prefersReducedMotion || !kineticState.canvas) return;
+    const dir = direction >= 0 ? 1 : -1;
+    kineticState.phaseImpulseVel = dir * 3.8;
+    kineticState.ringX = kineticState.w * 0.5;
+    kineticState.ringY = kineticState.h * 0.42;
+    kineticState.ringRadius = 24;
+    kineticState.ringAlpha = 0.22;
+  }
+
+  function resizeKineticCanvas() {
+    const canvas = kineticState.canvas;
+    if (!canvas) return;
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    kineticState.w = w;
+    kineticState.h = h;
+    kineticState.dpr = dpr;
+    canvas.width = Math.round(w * dpr);
+    canvas.height = Math.round(h * dpr);
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
+    if (kineticState.ctx) {
+      kineticState.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      if (prefersReducedMotion) drawKineticFrame(0);
+    }
+  }
+
+  function drawKineticFrame(dt) {
+    const ctx = kineticState.ctx;
+    const w = kineticState.w;
+    const h = kineticState.h;
+    if (!ctx || !w || !h) return;
+
+    // Advance organic ambient phase + smooth damped layer-switch impulse
+    kineticState.phase += dt * 0.72 + kineticState.phaseImpulseVel * dt;
+    kineticState.phaseImpulseVel *= Math.pow(0.08, dt);
+    if (Math.abs(kineticState.phaseImpulseVel) < 0.002) kineticState.phaseImpulseVel = 0;
+
+    if (kineticState.ringAlpha > 0.004) {
+      kineticState.ringRadius += dt * Math.max(w, h) * 0.85;
+      kineticState.ringAlpha *= Math.pow(0.14, dt);
+    } else {
+      kineticState.ringAlpha = 0;
+    }
+
+    // Lerp desktop cursor coordinates & active presence smoothly
+    const targetStrength = kineticState.pointerActive ? 1 : 0;
+    const lerpFactor = 1 - Math.pow(0.0012, dt);
+    kineticState.pointerStrength += (targetStrength - kineticState.pointerStrength) * lerpFactor;
+    if (kineticState.pointerActive) {
+      if (kineticState.curX < -1000) {
+        kineticState.curX = kineticState.targetX;
+        kineticState.curY = kineticState.targetY;
+      } else {
+        kineticState.curX += (kineticState.targetX - kineticState.curX) * lerpFactor;
+        kineticState.curY += (kineticState.targetY - kineticState.curY) * lerpFactor;
+      }
+    }
+
+    ctx.clearRect(0, 0, w, h);
+
+    const t = kineticState.phase;
+    const dark = kineticState.isDark;
+    const rgb = dark ? '235, 235, 235' : '34, 34, 34';
+    const isMobile = w < 768 || !hasFinePointer;
+    const spacing = isMobile ? 46 : 40;
+    const cols = Math.ceil(w / spacing) + 1;
+    const rows = Math.ceil(h / spacing) + 1;
+    const offsetX = ((w - (cols - 1) * spacing) * 0.5);
+    const offsetY = ((h - (rows - 1) * spacing) * 0.5);
+    const influenceRadius = isMobile ? 0 : 175;
+    const influenceSq = influenceRadius * influenceRadius;
+    const pStr = kineticState.pointerStrength;
+    const px = kineticState.curX;
+    const py = kineticState.curY;
+    const ringR = kineticState.ringRadius;
+    const ringA = kineticState.ringAlpha;
+
+    // 1. Subtle Flowing Architectural Contour / Signal Lines (3 harmonic bands)
+    const lineCount = isMobile ? 2 : 3;
+    const stepX = isMobile ? 32 : 24;
+    ctx.lineWidth = 1;
+    for (let li = 0; li < lineCount; li++) {
+      const baseY = h * (0.24 + li * 0.27);
+      const amp = (isMobile ? 16 : 24) + li * 6;
+      const freq = 0.0024 + li * 0.0007;
+      const speed = (li % 2 === 0 ? 1 : -0.82);
+      ctx.beginPath();
+      for (let x = -stepX; x <= w + stepX; x += stepX) {
+        let y = baseY
+          + Math.sin(x * freq + t * speed + li * 1.4) * amp
+          + Math.cos(x * freq * 0.52 - t * 0.55 + li) * (amp * 0.48);
+
+        if (!isMobile && pStr > 0.01) {
+          const dx = x - px;
+          const dy = y - py;
+          const distSq = dx * dx + dy * dy;
+          if (distSq < influenceSq * 1.65) {
+            const dist = Math.sqrt(distSq);
+            const falloff = Math.exp(-(dist * dist) / (influenceSq * 0.58));
+            const bend = Math.sin(dist * 0.032 - t * 2.2) * 10 + (dy > 0 ? 12 : -12);
+            y += bend * falloff * pStr;
+          }
+        }
+
+        if (x === -stepX) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.strokeStyle = 'rgba(' + rgb + ', ' + (dark ? 0.075 : 0.068) + ')';
+      ctx.stroke();
+    }
+
+    // 2. Precision Kinetic Dot-Matrix Grid (Ambient Wave + Cursor Magnetic Ripple + Layer Impulse)
+    for (let r = 0; r < rows; r++) {
+      const gy = offsetY + r * spacing;
+      for (let c = 0; c < cols; c++) {
+        const gx = offsetX + c * spacing;
+        const waveA = Math.sin(gx * 0.011 + gy * 0.007 + t * 0.95);
+        const waveB = Math.cos(gx * 0.006 - gy * 0.012 + t * 0.62);
+
+        let dx = waveA * 2.6;
+        let dy = waveB * 2.6;
+        let alpha = (dark ? 0.11 : 0.115) + (waveA + waveB) * 0.028;
+        let radius = 1.1 + (waveA * 0.22);
+
+        // Layer-switch physical wave ring ripple
+        if (ringA > 0.005) {
+          const rx = gx - kineticState.ringX;
+          const ry = gy - kineticState.ringY;
+          const rDist = Math.sqrt(rx * rx + ry * ry);
+          const band = Math.abs(rDist - ringR);
+          if (band < 85 && rDist > 1) {
+            const k = (1 - band / 85) * ringA;
+            dx += (rx / rDist) * k * 28;
+            dy += (ry / rDist) * k * 28;
+            alpha += k * 0.36;
+            radius += k * 1.6;
+          }
+        }
+
+        // Desktop cursor elastic magnetic displacement
+        if (!isMobile && pStr > 0.01) {
+          const mdx = gx - px;
+          const mdy = gy - py;
+          const dSq = mdx * mdx + mdy * mdy;
+          if (dSq < influenceSq && dSq > 0.01) {
+            const dist = Math.sqrt(dSq);
+            const norm = 1 - dist / influenceRadius;
+            const ease = norm * norm * pStr;
+            const ripple = Math.sin(dist * 0.055 - t * 3.1) * 3.2;
+            const push = ease * 14 + ripple * ease;
+            dx += (mdx / dist) * push;
+            dy += (mdy / dist) * push;
+            alpha += ease * 0.22;
+            radius += ease * 1.05;
+          }
+        }
+
+        ctx.fillStyle = 'rgba(' + rgb + ', ' + Math.max(0.03, Math.min(0.46, alpha)).toFixed(3) + ')';
+        ctx.beginPath();
+        ctx.arc(gx + dx, gy + dy, Math.max(0.75, radius), 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+  }
+
+  function kineticLoop(ts) {
+    if (!kineticState.running) return;
+    if (!kineticState.lastTs) kineticState.lastTs = ts;
+    const dt = Math.min((ts - kineticState.lastTs) / 1000, 0.05);
+    kineticState.lastTs = ts;
+    drawKineticFrame(dt);
+    kineticState.rafId = requestAnimationFrame(kineticLoop);
+  }
+
+  function startKineticLoop() {
+    if (prefersReducedMotion || kineticState.running || document.hidden) return;
+    kineticState.running = true;
+    kineticState.lastTs = 0;
+    kineticState.rafId = requestAnimationFrame(kineticLoop);
+  }
+
+  function stopKineticLoop() {
+    kineticState.running = false;
+    if (kineticState.rafId) {
+      cancelAnimationFrame(kineticState.rafId);
+      kineticState.rafId = null;
+    }
+  }
+
+  function initKineticBackground() {
+    const canvas = document.getElementById('kinetic-bg-canvas');
+    if (!canvas || !canvas.getContext) return;
+    kineticState.canvas = canvas;
+    kineticState.ctx = canvas.getContext('2d');
+    kineticState.isDark = document.documentElement.classList.contains('dark');
+    resizeKineticCanvas();
+
+    let resizeTimer = null;
+    const scheduleResize = function () {
+      if (resizeTimer) clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(resizeKineticCanvas, 80);
+    };
+
+    if (typeof ResizeObserver === 'function') {
+      const ro = new ResizeObserver(scheduleResize);
+      ro.observe(document.documentElement);
+    } else {
+      window.addEventListener('resize', scheduleResize, { passive: true });
+    }
+
+    if (hasFinePointer && !prefersReducedMotion) {
+      document.addEventListener('pointermove', function (e) {
+        kineticState.targetX = e.clientX;
+        kineticState.targetY = e.clientY;
+        kineticState.pointerActive = true;
+      }, { passive: true });
+
+      document.addEventListener('pointerleave', function () {
+        kineticState.pointerActive = false;
+      }, { passive: true });
+    }
+
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) stopKineticLoop();
+      else startKineticLoop();
+    });
+
+    if (prefersReducedMotion) {
+      drawKineticFrame(0);
+    } else {
+      startKineticLoop();
+    }
+  }
+
+  /* ------------------------------------------------------------------------
+     Below-the-Fold Scroll Depth Reveal (Zero Stuck-Hidden Guarantee)
+     ------------------------------------------------------------------------ */
+  let scrollObserver = null;
+
+  function revealElementNow(el) {
+    if (!el) return;
+    el.classList.remove('reveal-pending');
+    el.classList.add('is-revealed');
+    if (scrollObserver) scrollObserver.unobserve(el);
+  }
+
+  function checkPendingScrollReveals() {
+    const activeLayer = document.querySelector('.view-layer.active');
+    if (!activeLayer) return;
+    const vh = window.innerHeight || 900;
+    activeLayer.querySelectorAll('.scroll-reveal.reveal-pending').forEach(function (el) {
+      const rect = el.getBoundingClientRect();
+      if (rect.top < vh * 1.04) revealElementNow(el);
+    });
+  }
+
+  function initScrollReveal() {
+    if (prefersReducedMotion || typeof IntersectionObserver !== 'function') return;
+    scrollObserver = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) revealElementNow(entry.target);
+      });
+    }, { threshold: 0.04, rootMargin: '0px 0px 48px 0px' });
+
+    window.addEventListener('scroll', checkPendingScrollReveals, { passive: true });
+    window.addEventListener('resize', checkPendingScrollReveals, { passive: true });
+  }
+
+  function refreshScrollReveals(container) {
+    const scope = container || document;
+    const nodes = scope.querySelectorAll('.scroll-reveal');
+    if (!nodes.length) return;
+
+    if (prefersReducedMotion || !scrollObserver) {
+      nodes.forEach(revealElementNow);
+      return;
+    }
+
+    const vh = window.innerHeight || 900;
+    nodes.forEach(function (el) {
+      el.classList.remove('reveal-pending', 'is-revealed');
+      const rect = el.getBoundingClientRect();
+      // Only gate elements strictly below the current viewport fold
+      if (rect.top > vh * 0.98) {
+        el.classList.add('reveal-pending');
+        scrollObserver.observe(el);
+      } else {
+        el.classList.add('is-revealed');
+      }
     });
   }
 
   /* ------------------------------------------------------------------------
-     Gallery Wall in Motion: Multi-Depth Mosaic Parallax & Subtle Pointer Motion (60fps RAF)
+     Gallery Wall in Motion: Multi-Depth Mosaic Parallax & Subtle Pointer Highlight
      ------------------------------------------------------------------------ */
   function initDesktopMotion() {
     if (prefersReducedMotion || !hasFinePointer) return;
 
-    const gridBg = document.getElementById('tech-grid-bg');
     const homeLayer = document.getElementById('view-home');
     const mosaicTiles = Array.prototype.slice.call(document.querySelectorAll('.mosaic-tile[data-parallax-depth]'));
     let rafPending = false;
@@ -790,12 +1153,6 @@
         const normX = lastEvent.clientX / window.innerWidth - 0.5;
         const normY = lastEvent.clientY / window.innerHeight - 0.5;
 
-        if (gridBg && isDesktop) {
-          gridBg.style.setProperty('--grid-x', (normX * -12).toFixed(1) + 'px');
-          gridBg.style.setProperty('--grid-y', (normY * -12).toFixed(1) + 'px');
-        }
-
-        // Gallery Wall in Motion: distinct depth parallax per mosaic tile on #home desktop
         if (isDesktop && homeLayer && homeLayer.classList.contains('active') && mosaicTiles.length) {
           const maxShiftX = 22;
           const maxShiftY = 16;
@@ -830,8 +1187,8 @@
   document.addEventListener('DOMContentLoaded', function () {
     applyTheme(getStoredTheme(), false);
     setLanguage(getStoredLang(), false);
-    updateWibClocks();
-    setInterval(updateWibClocks, 1000);
+    initScrollReveal();
+    initKineticBackground();
     initDesktopMotion();
 
     navigateTo(resolveViewFromHash(window.location.hash), false);
@@ -912,7 +1269,7 @@
         document.querySelectorAll('[data-cert-filter]').forEach(function (b) {
           b.classList.toggle('active', b === certFilterBtn);
         });
-        renderCertificatesView();
+        renderCertificatesView(true);
         return;
       }
 
