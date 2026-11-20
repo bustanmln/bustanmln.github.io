@@ -11,7 +11,7 @@
   <meta property="og:description"
     content="Final-Year Electrical Engineering student at Telkom University. Instrumentation Maintenance Intern at PT Semen Indonesia (SIG), IRIS & SPELL Lab, Daskom Hardware." />
   <meta property="og:type" content="website" />
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='8' fill='%230f172a'/%3E%3Crect x='3' y='3' width='58' height='58' rx='6' fill='none' stroke='%23c2410c' stroke-width='3'/%3E%3Ctext x='32' y='41' text-anchor='middle' font-family='monospace' font-weight='700' font-size='26' fill='%23f5f4f0'%3EBN%3C/text%3E%3C/svg%3E" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='8' fill='%23222222'/%3E%3Ctext x='32' y='41' text-anchor='middle' font-family='Inter,sans-serif' font-weight='700' font-size='26' letter-spacing='-1' fill='%23ffffff'%3EBN%3C/text%3E%3C/svg%3E" />
 
   <!-- Zero-FOUC theme & language bootstrap -->
   <script>
@@ -22,7 +22,7 @@
         raw = localStorage.getItem('bustan-theme-preference');
         savedLang = localStorage.getItem('bustan-lang-preference');
       } catch (e) {}
-      var pref = (raw === 'light' || raw === 'dark' || raw === 'system') ? raw : 'system';
+      var pref = (raw === 'light' || raw === 'dark' || raw === 'system') ? raw : 'light';
       var sysDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
       var resolved = pref === 'dark' ? 'dark' : (pref === 'light' ? 'light' : (sysDark ? 'dark' : 'light'));
       document.documentElement.setAttribute('data-theme-mode', pref);
@@ -32,11 +32,11 @@
     })();
   </script>
 
-  <!-- Fonts: Space Grotesk, IBM Plex Sans, JetBrains Mono -->
+  <!-- Fonts: Inter, Inter Tight (Studio.Design Editorial) & JetBrains Mono (Technical Metadata) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
-    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
     rel="stylesheet" />
 
   <link rel="stylesheet" href="css/style.css" />
@@ -165,13 +165,87 @@
     <div class="container">
 
       <!-- ===============================================================
-           LAYER 00: HOME (ASYMMETRIC 40/60 SPLIT + BENTO OVERVIEW)
+           LAYER 00: HOME (STUDIO.DESIGN "GALLERY WALL IN MOTION" HERO)
            =============================================================== -->
       <section id="view-home" class="view-layer active" aria-label="Home Overview">
-        <div class="home-split">
-          <!-- Left Sticky 40% Column: Engineer Identification Dossier -->
+        <!-- Asymmetric Gallery Wall Hero on Seamless Studio Canvas (#eeeeee) -->
+        <div class="gallery-hero">
+          <div class="hero-statement-block stagger-item" style="--stagger-i:0">
+            <div class="status-strip">
+              <span class="status-dot" aria-hidden="true"></span>
+              <span data-i18n="home.status">OPEN FOR INDUSTRIAL AUTOMATION, INSTRUMENTATION &amp; IOT ROLES</span>
+            </div>
+
+            <h1 class="hero-headline">
+              <span data-i18n="home.headline.pre">Industrial Automation, </span><span class="headline-subdued" data-i18n="home.headline.accent">Embedded IoT</span><span data-i18n="home.headline.post"> &amp; Applied AI.</span>
+            </h1>
+          </div>
+
+          <!-- Center-Right Overlapping Portfolio Mosaic (Raw Vivid Work, 4px/8px Radii, Depth Parallax) -->
+          <div id="hero-mosaic" class="hero-mosaic" aria-label="Featured Engineering Works Collage">
+            <button type="button" class="mosaic-tile tile-a radius-lg" data-parallax-depth="0.55" data-jump-view="projects" data-jump-id="prj-sipesat" style="--tile-i:0" aria-label="SIPESAT Waste Sorting System">
+              <span class="mosaic-parallax">
+                <img src="images/projects/SIPESAT%20%E2%80%93%20Sistem%20Pemilah%20Sampah%20Terpadu/IMG_20261120_103621.jpg" alt="SIPESAT Integrated Waste Sorting System" />
+                <span class="mosaic-tag">PRJ-01 · SIPESAT</span>
+              </span>
+            </button>
+
+            <button type="button" class="mosaic-tile tile-b radius-md" data-parallax-depth="-0.75" data-jump-view="experience" data-jump-id="exp-sig" style="--tile-i:1" aria-label="PT Semen Indonesia Internship">
+              <span class="mosaic-parallax">
+                <img src="images/experience/Instrumentation%20Maintenance%20Intern/Semen1.JPG" alt="PT Semen Indonesia Instrumentation Maintenance" />
+                <span class="mosaic-tag">EXP-01 · SIG TUBAN</span>
+              </span>
+            </button>
+
+            <button type="button" class="mosaic-tile tile-c radius-lg" data-parallax-depth="0.95" data-jump-view="projects" data-jump-id="prj-sumo" style="--tile-i:2" aria-label="Autonomous Sumo Robot Navigation System">
+              <span class="mosaic-parallax">
+                <img src="images/projects/Autonomous%20Sumo%20Robot%20Navigation%20System/sumo.jpg" alt="Autonomous Sumo Robot Navigation System" />
+                <span class="mosaic-tag">PRJ-03 · SUMO ROBOT</span>
+              </span>
+            </button>
+
+            <button type="button" class="mosaic-tile tile-d radius-md" data-parallax-depth="-0.45" data-jump-view="projects" data-jump-id="prj-iot-power" style="--tile-i:3" aria-label="IoT Power Intensity Control and Energy Monitoring with KNN">
+              <span class="mosaic-parallax">
+                <img src="images/projects/IoT%20Power%20Intensity%20Control%20%26%20Energy%20Monitoring%20with%20KNN/iot1.jpg" alt="IoT Power Monitoring with KNN" />
+                <span class="mosaic-tag">PRJ-02 · IOT KNN</span>
+              </span>
+            </button>
+
+            <button type="button" class="mosaic-tile tile-e radius-md" data-parallax-depth="0.65" data-jump-view="projects" data-jump-id="prj-agv" style="--tile-i:4" aria-label="AGV Blind Spot Detection System">
+              <span class="mosaic-parallax">
+                <img src="images/projects/AGV%20Blind%20Spot%20Detection%20System/ultrasonic1.jpg" alt="AGV Blind Spot Ultrasonic Phased Array" />
+                <span class="mosaic-tag">PRJ-04 · AGV ARRAY</span>
+              </span>
+            </button>
+          </div>
+
+          <!-- Lower-Right Editorial Description + Prominent Charcoal Ink Action Controls -->
+          <div class="hero-lower-right stagger-item" style="--stagger-i:1">
+            <p class="hero-bio" data-i18n-html="home.bio.html">
+              I am <strong>Bustan Nabiel Maulana</strong>, a final-year Electrical Engineering student at
+              <strong>Telkom University</strong> specializing in industrial automation, field instrumentation, embedded
+              systems, robotics, and edge AI. Experienced in load cell calibration and PLC/HMI/SCADA field maintenance
+              at <strong>PT Semen Indonesia (Persero) Tbk (SIG) Pabrik Tuban</strong>, alongside active laboratory
+              coordination and applied research across IRIS, SPELL, and Daskom Laboratories.
+            </p>
+
+            <div class="hero-actions">
+              <a href="#projects" data-nav-view="projects" class="btn btn-primary btn-lift">
+                <span data-i18n="home.cta.projects">Explore Projects</span>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+              </a>
+              <a href="#experience" data-nav-view="experience" class="btn btn-secondary" data-i18n="home.cta.experience">Experience Deck</a>
+              <a href="#contact" data-nav-view="contact" class="btn btn-secondary" data-i18n="home.cta.contact">Contact</a>
+              <button type="button" class="btn btn-bare" data-open-cv data-i18n="home.cta.cv">CV Summary</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 00.1 Engineer Dossier + Telemetry KPIs + Dark Feature Pillars -->
+        <div class="home-split home-subblock">
+          <!-- Left Sticky Column: Engineer Identification Dossier -->
           <aside class="dossier-col" aria-label="Engineer Profile Dossier">
-            <div class="dossier-card interactive-card stagger-item" style="--stagger-i:0">
+            <div class="dossier-card stagger-item" style="--stagger-i:2">
               <div class="dossier-telemetry">
                 <span style="display:inline-flex; align-items:center; gap:0.45rem;">
                   <span class="status-dot" aria-hidden="true"></span>
@@ -234,26 +308,9 @@
             </div>
           </aside>
 
-          <!-- Right Expansive 60% Column: Left-Aligned Hero Narrative + KPI + Pillars -->
+          <!-- Right Column: KPI Metrics + Dark Charcoal Core Engineering Pillars -->
           <div class="home-main-col">
-            <div class="stagger-item" style="--stagger-i:1">
-              <div class="status-pill">
-                <span class="status-dot" aria-hidden="true"></span>
-                <span data-i18n="home.status">OPEN FOR INDUSTRIAL AUTOMATION, INSTRUMENTATION &amp; IOT ROLES</span>
-              </div>
-
-              <h1 class="hero-headline">
-                <span data-i18n="home.headline.pre">Industrial Automation, </span><span class="accent" data-i18n="home.headline.accent">Embedded IoT</span><span data-i18n="home.headline.post"> &amp; Applied AI.</span>
-              </h1>
-
-              <p class="hero-bio" data-i18n-html="home.bio.html">
-                I am <strong>Bustan Nabiel Maulana</strong>, a final-year Electrical Engineering student at
-                <strong>Telkom University</strong> specializing in industrial automation, field instrumentation, embedded
-                systems, robotics, and edge AI. Experienced in load cell calibration and PLC/HMI/SCADA field maintenance
-                at <strong>PT Semen Indonesia (Persero) Tbk (SIG) Pabrik Tuban</strong>, alongside active laboratory
-                coordination and applied research across IRIS, SPELL, and Daskom Laboratories.
-              </p>
-
+            <div class="stagger-item" style="--stagger-i:2">
               <div class="kpi-strip" aria-label="Portfolio Metrics">
                 <a href="#experience" data-nav-view="experience" class="kpi-cell">
                   <span class="kpi-num">05</span>
@@ -272,30 +329,20 @@
                   <span class="kpi-label" data-i18n="home.kpi.sig">ELINS KC 3-4 Intern</span>
                 </a>
               </div>
-
-              <div class="hero-actions">
-                <a href="#projects" data-nav-view="projects" class="btn btn-primary">
-                  <span data-i18n="home.cta.projects">Explore Projects</span>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-                </a>
-                <a href="#experience" data-nav-view="experience" class="btn btn-secondary" data-i18n="home.cta.experience">Experience Deck</a>
-                <a href="#contact" data-nav-view="contact" class="btn btn-secondary" data-i18n="home.cta.contact">Contact</a>
-                <button type="button" class="btn btn-secondary" data-open-cv data-i18n="home.cta.cv">CV Summary</button>
-              </div>
             </div>
 
-            <!-- 00.1 Core Competency Pillars -->
-            <div class="stagger-item" style="--stagger-i:2">
+            <!-- 00.1 Core Competency Pillars (Studio.Design Charcoal Dark Feature Panel) -->
+            <div class="stagger-item" style="--stagger-i:3">
               <div class="subblock-head">
-                <h2 class="subblock-title" data-i18n="pillars.title">Core Engineering Pillars</h2>
+                <h2 class="subblock-title editorial-heading" data-i18n="pillars.title">Core Engineering Pillars</h2>
                 <span class="mono" style="font-size:11px; color:var(--ink-muted);" data-i18n="pillars.code">00.1 // DISCIPLINE MATRIX</span>
               </div>
 
-              <div class="pillars-grid">
-                <div class="pillar-card interactive-card">
+              <div class="pillars-grid dark-feature-panel">
+                <div class="pillar-card">
                   <div>
                     <div class="pillar-head">
-                      <span class="eyebrow" data-i18n="pillars.c1.eyebrow">CH-01 // INDUSTRIAL</span>
+                      <span class="eyebrow eyebrow-inverse" data-i18n="pillars.c1.eyebrow">CH-01 // INDUSTRIAL</span>
                       <span class="pillar-icon" aria-hidden="true">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
                       </span>
@@ -304,16 +351,16 @@
                     <p data-i18n="pillars.c1.desc">Field maintenance of process sensors, Pulverized Weigher (PW 2 &amp; PW 3) load cell zero/span calibration, control valve inspection, and PLC/HMI/SCADA interconnection at PT Semen Indonesia (SIG).</p>
                   </div>
                   <div class="tag-list">
-                    <span class="tag">PLC / HMI / SCADA</span>
-                    <span class="tag">Load Cell Calibration</span>
-                    <span class="tag">MOVIDRIVE</span>
+                    <span class="tag tag-dark">PLC / HMI / SCADA</span>
+                    <span class="tag tag-dark">Load Cell Calibration</span>
+                    <span class="tag tag-dark">MOVIDRIVE</span>
                   </div>
                 </div>
 
-                <div class="pillar-card interactive-card">
+                <div class="pillar-card">
                   <div>
                     <div class="pillar-head">
-                      <span class="eyebrow" data-i18n="pillars.c2.eyebrow">CH-02 // EMBEDDED</span>
+                      <span class="eyebrow eyebrow-inverse" data-i18n="pillars.c2.eyebrow">CH-02 // EMBEDDED</span>
                       <span class="pillar-icon" aria-hidden="true">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="14" x2="23" y2="14"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="14" x2="4" y2="14"></line></svg>
                       </span>
@@ -322,16 +369,16 @@
                     <p data-i18n="pillars.c2.desc">End-to-end connected hardware using ESP32, Raspberry Pi 4, and Teensy with electrical metering (PZEM-004T), Firebase cloud telemetry, closed-loop robotics, and Android companion apps.</p>
                   </div>
                   <div class="tag-list">
-                    <span class="tag">ESP32 / RPi 4 / Teensy</span>
-                    <span class="tag">Firebase / MQTT</span>
-                    <span class="tag">Embedded C</span>
+                    <span class="tag tag-dark">ESP32 / RPi 4 / Teensy</span>
+                    <span class="tag tag-dark">Firebase / MQTT</span>
+                    <span class="tag tag-dark">Embedded C</span>
                   </div>
                 </div>
 
-                <div class="pillar-card interactive-card">
+                <div class="pillar-card">
                   <div>
                     <div class="pillar-head">
-                      <span class="eyebrow" data-i18n="pillars.c3.eyebrow">CH-03 // APPLIED AI</span>
+                      <span class="eyebrow eyebrow-inverse" data-i18n="pillars.c3.eyebrow">CH-03 // APPLIED AI</span>
                       <span class="pillar-icon" aria-hidden="true">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                       </span>
@@ -340,9 +387,9 @@
                     <p data-i18n="pillars.c3.desc">Edge inference using TensorFlow Lite and OpenCV on Raspberry Pi, K-Nearest Neighbor (KNN) power anomaly classification, and high-speed 4.6 Mbps ultrasonic phased-array signal processing.</p>
                   </div>
                   <div class="tag-list">
-                    <span class="tag">TensorFlow Lite</span>
-                    <span class="tag">OpenCV</span>
-                    <span class="tag">KNN / Python</span>
+                    <span class="tag tag-dark">TensorFlow Lite</span>
+                    <span class="tag tag-dark">OpenCV</span>
+                    <span class="tag tag-dark">KNN / Python</span>
                   </div>
                 </div>
               </div>
@@ -350,53 +397,53 @@
           </div>
         </div>
 
-        <!-- 00.2 Full-Width Selected Visual Highlights -->
-        <div class="home-subblock stagger-item" style="--stagger-i:3">
+        <!-- 00.2 Full-Width Black Showcase Highlights (Edge-to-Edge 0px Padded Visuals, 8px Radius, No Shadow) -->
+        <div class="home-subblock stagger-item" style="--stagger-i:4">
           <div class="subblock-head">
-            <h2 class="subblock-title" data-i18n="highlights.title">Selected Highlights</h2>
+            <h2 class="subblock-title editorial-heading" data-i18n="highlights.title">Selected Highlights</h2>
             <span class="mono" style="font-size:11px; color:var(--ink-muted);" data-i18n="highlights.code">00.2 // DIRECT LAYER SHORTCUTS</span>
           </div>
 
           <div class="highlights-grid">
-            <button type="button" class="highlight-card interactive-card" data-jump-view="experience" data-jump-id="exp-sig">
+            <button type="button" class="highlight-card black-showcase-card" data-jump-view="experience" data-jump-id="exp-sig">
               <div class="highlight-thumb">
                 <img src="images/experience/Instrumentation%20Maintenance%20Intern/Semen1.JPG" alt="PT Semen Indonesia Internship" loading="lazy" />
               </div>
               <div class="highlight-body">
-                <span class="eyebrow" data-i18n="highlights.h1.eyebrow">EXPERIENCE · SIG</span>
+                <span class="eyebrow eyebrow-inverse" data-i18n="highlights.h1.eyebrow">EXPERIENCE · SIG</span>
                 <h4 data-i18n="highlights.h1.title">Instrumentation Maintenance Intern</h4>
                 <p data-i18n="highlights.h1.sub">PT Semen Indonesia (SIG) Pabrik Tuban · 3 Photos</p>
               </div>
             </button>
 
-            <button type="button" class="highlight-card interactive-card" data-jump-view="projects" data-jump-id="prj-sipesat">
+            <button type="button" class="highlight-card black-showcase-card" data-jump-view="projects" data-jump-id="prj-sipesat">
               <div class="highlight-thumb">
                 <img src="images/projects/SIPESAT%20%E2%80%93%20Sistem%20Pemilah%20Sampah%20Terpadu/IMG_20261120_103621.jpg" alt="SIPESAT Waste Sorting System" loading="lazy" />
               </div>
               <div class="highlight-body">
-                <span class="eyebrow" data-i18n="highlights.h2.eyebrow">PROJECT · PRJ-01</span>
+                <span class="eyebrow eyebrow-inverse" data-i18n="highlights.h2.eyebrow">PROJECT · PRJ-01</span>
                 <h4 data-i18n="highlights.h2.title">SIPESAT Waste Sorting System</h4>
                 <p data-i18n="highlights.h2.sub">Raspberry Pi 4 · TensorFlow Lite · 4 Photos</p>
               </div>
             </button>
 
-            <button type="button" class="highlight-card interactive-card" data-jump-view="projects" data-jump-id="prj-sumo">
+            <button type="button" class="highlight-card black-showcase-card" data-jump-view="projects" data-jump-id="prj-sumo">
               <div class="highlight-thumb">
                 <img src="images/projects/Autonomous%20Sumo%20Robot%20Navigation%20System/sumo.jpg" alt="Autonomous Sumo Robot" loading="lazy" />
               </div>
               <div class="highlight-body">
-                <span class="eyebrow" data-i18n="highlights.h3.eyebrow">PROJECT · PRJ-03</span>
+                <span class="eyebrow eyebrow-inverse" data-i18n="highlights.h3.eyebrow">PROJECT · PRJ-03</span>
                 <h4 data-i18n="highlights.h3.title">Autonomous Sumo Robot</h4>
                 <p data-i18n="highlights.h3.sub">ESP32 · VL53L0X ToF · Closed-Loop · 6 Photos</p>
               </div>
             </button>
 
-            <button type="button" class="highlight-card interactive-card" data-jump-view="certificates">
+            <button type="button" class="highlight-card black-showcase-card" data-jump-view="certificates">
               <div class="highlight-thumb contain-img">
                 <img src="images/certificates/oracle_ai_foundations.png" alt="Oracle OCI 2025 Certified AI Foundations Associate" loading="lazy" />
               </div>
               <div class="highlight-body">
-                <span class="eyebrow" data-i18n="highlights.h4.eyebrow">CERTIFICATES · 13</span>
+                <span class="eyebrow eyebrow-inverse" data-i18n="highlights.h4.eyebrow">CERTIFICATES · 13</span>
                 <h4 data-i18n="highlights.h4.title">Oracle OCI 2025 AI &amp; SIC Batch 7</h4>
                 <p data-i18n="highlights.h4.sub">Inspect all 13 verified credentials</p>
               </div>

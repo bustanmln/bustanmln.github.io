@@ -234,7 +234,7 @@
       const v = localStorage.getItem(THEME_KEY);
       if (v === 'light' || v === 'dark' || v === 'system') return v;
     } catch (_) {}
-    return 'system';
+    return 'light';
   }
 
   function applyTheme(pref, persist) {
@@ -427,7 +427,7 @@
     bentoEl.innerHTML = filtered.map(function (p) {
       const isAct = p.id === active.id;
       return (
-        '<button type="button" class="bento-prj-card interactive-card' + (isAct ? ' active' : '') + '" data-select-prj="' + p.id + '">' +
+        '<button type="button" class="bento-prj-card black-showcase-card' + (isAct ? ' active' : '') + '" data-select-prj="' + p.id + '">' +
           '<div class="bento-prj-thumb">' +
             '<img src="' + safeAttrUrl(p.photos[0].src) + '" alt="' + escapeHtml(p.title) + '" loading="lazy" />' +
             '<span class="bento-prj-badge">' + p.code + '</span>' +
@@ -437,7 +437,7 @@
             '<span class="bento-prj-cat">' + escapeHtml(pick(p.categoryLabel)) + '</span>' +
             '<h3 class="bento-prj-title">' + escapeHtml(p.title) + '</h3>' +
             '<div class="tag-list" style="margin-top:auto; padding-top:0.35rem;">' +
-              p.stack.slice(0, 3).map(function (s) { return '<span class="tag">' + escapeHtml(s) + '</span>'; }).join('') +
+              p.stack.slice(0, 3).map(function (s) { return '<span class="tag tag-dark">' + escapeHtml(s) + '</span>'; }).join('') +
             '</div>' +
           '</div>' +
         '</button>'
@@ -543,7 +543,7 @@
             '<p class="cert-desc">' + escapeHtml(desc) + '</p>' +
             '<div class="cert-foot">' +
               '<span class="cert-id">ID: ' + escapeHtml(c.credId) + '</span>' +
-              '<span style="display:inline-flex; align-items:center; gap:4px; color:var(--accent); font-weight:600;">' + escapeHtml(viewLabel) + ' ' + ICONS.expand + '</span>' +
+              '<span class="cert-view-cta">' + escapeHtml(viewLabel) + ' ' + ICONS.expand + '</span>' +
             '</div>' +
           '</div>' +
         '</button>'
@@ -757,14 +757,26 @@
   }
 
   /* ------------------------------------------------------------------------
-     Tactile Desktop Pointer Spotlight & Subtle Grid Parallax (60fps RAF)
+     Gallery Wall in Motion: Multi-Depth Mosaic Parallax & Subtle Pointer Motion (60fps RAF)
      ------------------------------------------------------------------------ */
   function initDesktopMotion() {
     if (prefersReducedMotion || !hasFinePointer) return;
 
     const gridBg = document.getElementById('tech-grid-bg');
+    const homeLayer = document.getElementById('view-home');
+    const mosaicTiles = Array.prototype.slice.call(document.querySelectorAll('.mosaic-tile[data-parallax-depth]'));
     let rafPending = false;
     let lastEvent = null;
+
+    function resetMosaicParallax() {
+      mosaicTiles.forEach(function (tile) {
+        const inner = tile.querySelector('.mosaic-parallax');
+        if (inner) {
+          inner.style.setProperty('--px', '0px');
+          inner.style.setProperty('--py', '0px');
+        }
+      });
+    }
 
     document.addEventListener('pointermove', function (e) {
       lastEvent = e;
@@ -774,11 +786,27 @@
         rafPending = false;
         if (!lastEvent) return;
 
-        if (gridBg && window.innerWidth >= 1024) {
-          const nx = (lastEvent.clientX / window.innerWidth - 0.5) * -14;
-          const ny = (lastEvent.clientY / window.innerHeight - 0.5) * -14;
-          gridBg.style.setProperty('--grid-x', nx.toFixed(1) + 'px');
-          gridBg.style.setProperty('--grid-y', ny.toFixed(1) + 'px');
+        const isDesktop = window.innerWidth >= 1024;
+        const normX = lastEvent.clientX / window.innerWidth - 0.5;
+        const normY = lastEvent.clientY / window.innerHeight - 0.5;
+
+        if (gridBg && isDesktop) {
+          gridBg.style.setProperty('--grid-x', (normX * -12).toFixed(1) + 'px');
+          gridBg.style.setProperty('--grid-y', (normY * -12).toFixed(1) + 'px');
+        }
+
+        // Gallery Wall in Motion: distinct depth parallax per mosaic tile on #home desktop
+        if (isDesktop && homeLayer && homeLayer.classList.contains('active') && mosaicTiles.length) {
+          const maxShiftX = 22;
+          const maxShiftY = 16;
+          mosaicTiles.forEach(function (tile) {
+            const depth = parseFloat(tile.getAttribute('data-parallax-depth')) || 0;
+            const inner = tile.querySelector('.mosaic-parallax');
+            if (inner) {
+              inner.style.setProperty('--px', (normX * maxShiftX * depth).toFixed(2) + 'px');
+              inner.style.setProperty('--py', (normY * maxShiftY * depth).toFixed(2) + 'px');
+            }
+          });
         }
 
         const card = lastEvent.target && lastEvent.target.closest ? lastEvent.target.closest('.interactive-card') : null;
@@ -788,6 +816,11 @@
           card.style.setProperty('--my', (lastEvent.clientY - rect.top).toFixed(1) + 'px');
         }
       });
+    }, { passive: true });
+
+    document.addEventListener('pointerleave', resetMosaicParallax, { passive: true });
+    window.addEventListener('resize', function () {
+      if (window.innerWidth < 1024) resetMosaicParallax();
     }, { passive: true });
   }
 
