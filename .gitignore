@@ -9,3 +9,6 @@ coverage/
 
 1.0/
 DESIGN.md
+3.0/
+.agents/
+skills-lock.json

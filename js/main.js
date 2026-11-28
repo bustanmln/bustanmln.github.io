@@ -118,7 +118,7 @@
       renderLightboxFrame();
     }
 
-    requestAnimationFrame(updateNavSlider);
+    requestAnimationFrame(function () { updateNavSlider(true); });
   }
 
   function copyToClipboard(text, btnEl) {
@@ -153,9 +153,11 @@
   }
 
   /* ------------------------------------------------------------------------
-     Pixel-Exact Sliding Desktop Nav Indicator
+     Pixel-Exact GPU-Only FLIP Sliding Desktop Nav Indicator (Zero width transition)
      ------------------------------------------------------------------------ */
-  function updateNavSlider() {
+  let navSliderPrev = null;
+
+  function updateNavSlider(immediate) {
     const shell = document.getElementById('desktop-nav-shell');
     const slider = document.getElementById('nav-slider');
     if (!shell || !slider) return;
@@ -166,10 +168,28 @@
     }
     const shellRect = shell.getBoundingClientRect();
     const linkRect = activeLink.getBoundingClientRect();
-    const x = linkRect.left - shellRect.left - shell.clientLeft;
-    slider.style.width = linkRect.width + 'px';
-    slider.style.transform = 'translate3d(' + x.toFixed(1) + 'px, 0, 0)';
-    slider.style.opacity = '1';
+    const nextX = linkRect.left - shellRect.left - shell.clientLeft;
+    const nextW = Math.max(linkRect.width, 1);
+
+    if (navSliderPrev && !immediate && !prefersReducedMotion && (Math.abs(navSliderPrev.x - nextX) > 0.5 || Math.abs(navSliderPrev.w - nextW) > 0.5)) {
+      const ratio = navSliderPrev.w / nextW;
+      slider.style.transition = 'none';
+      slider.style.width = nextW.toFixed(1) + 'px';
+      slider.style.transform = 'translate3d(' + navSliderPrev.x.toFixed(1) + 'px, 0, 0) scaleX(' + ratio.toFixed(4) + ')';
+      slider.style.opacity = '1';
+      void slider.offsetWidth;
+      slider.style.transition = '';
+      slider.style.transform = 'translate3d(' + nextX.toFixed(1) + 'px, 0, 0) scaleX(1)';
+    } else {
+      slider.style.transition = 'none';
+      slider.style.width = nextW.toFixed(1) + 'px';
+      slider.style.transform = 'translate3d(' + nextX.toFixed(1) + 'px, 0, 0) scaleX(1)';
+      slider.style.opacity = '1';
+      void slider.offsetWidth;
+      slider.style.transition = '';
+    }
+
+    navSliderPrev = { x: nextX, w: nextW };
   }
 
   /* ------------------------------------------------------------------------
@@ -209,7 +229,8 @@
     window.scrollTo(0, 0);
     const targetLayer = document.getElementById('view-' + target);
     if (targetLayer) refreshScrollReveals(targetLayer);
-    requestAnimationFrame(updateNavSlider);
+    if (typeof scheduleScrollParallaxUpdate === 'function') scheduleScrollParallaxUpdate();
+    requestAnimationFrame(function () { updateNavSlider(false); });
   }
 
   function navigateTo(viewId, updateHash) {
@@ -231,7 +252,7 @@
     if (updateHash !== false && window.location.hash !== '#' + target) {
       window.location.hash = target;
     }
-    requestAnimationFrame(updateNavSlider);
+    requestAnimationFrame(function () { updateNavSlider(false); });
 
     // Cancel any in-flight exit transition so rapid clicks never desync or hide layers
     if (navTransitionTimer) {
@@ -287,6 +308,7 @@
     const resolved = valid === 'dark' ? 'dark' : (valid === 'light' ? 'light' : (colorQuery.matches ? 'dark' : 'light'));
     document.documentElement.setAttribute('data-theme-mode', valid);
     document.documentElement.setAttribute('data-resolved-theme', resolved);
+    document.documentElement.setAttribute('data-theme', resolved);
     document.documentElement.classList.toggle('dark', resolved === 'dark');
 
     document.querySelectorAll('[data-theme-opt]').forEach(function (btn) {
@@ -316,6 +338,24 @@
     return EXPERIENCES.filter(function (e) { return e.track === expState.filter; });
   }
 
+  function swapStageImage(imgEl, nextSrc, nextAlt) {
+    if (!imgEl) return;
+    if (prefersReducedMotion) {
+      imgEl.src = nextSrc;
+      imgEl.alt = nextAlt;
+      return;
+    }
+    imgEl.classList.add('stage-img-switching');
+    const clear = function () {
+      imgEl.classList.remove('stage-img-switching');
+    };
+    imgEl.onload = clear;
+    imgEl.src = nextSrc;
+    imgEl.alt = nextAlt;
+    if (imgEl.complete) requestAnimationFrame(clear);
+    setTimeout(clear, 180);
+  }
+
   function updateExpPhotoStage() {
     const active = EXPERIENCES.find(function (e) { return e.id === expState.selectedId; });
     if (!active || !active.photos.length) return;
@@ -323,10 +363,7 @@
     const imgEl = document.getElementById('exp-stage-img');
     const counterEl = document.getElementById('exp-stage-counter');
     const capEl = document.getElementById('exp-stage-cap');
-    if (imgEl) {
-      imgEl.src = safeUrl(photo.src);
-      imgEl.alt = pick(photo.caption);
-    }
+    swapStageImage(imgEl, safeUrl(photo.src), pick(photo.caption));
     if (counterEl) counterEl.textContent = (expState.photoIdx + 1) + ' / ' + active.photos.length;
     if (capEl) capEl.textContent = pick(photo.caption);
     document.querySelectorAll('#exp-detail .thumb-btn').forEach(function (btn) {
@@ -376,7 +413,7 @@
     detailEl.innerHTML =
       '<div class="detail-sheet detail-sheet-wide' + (animateEnter ? ' detail-enter' : '') + '">' +
         '<div class="media-showcase">' +
-          '<div class="media-stage">' +
+          '<div class="media-stage parallax-frame" data-scroll-parallax="0.14">' +
             (active.photos.length > 1
               ? '<button type="button" class="stage-arrow prev" data-exp-step="-1" aria-label="Previous photo">' + ICONS.prev + '</button>' +
                 '<button type="button" class="stage-arrow next" data-exp-step="1" aria-label="Next photo">' + ICONS.next + '</button>'
@@ -417,6 +454,8 @@
           '</div>' +
         '</div>' +
       '</div>';
+
+    if (typeof scheduleScrollParallaxUpdate === 'function') scheduleScrollParallaxUpdate();
   }
 
   /* ------------------------------------------------------------------------
@@ -440,10 +479,7 @@
     const imgEl = document.getElementById('prj-stage-img');
     const counterEl = document.getElementById('prj-stage-counter');
     const capEl = document.getElementById('prj-stage-cap');
-    if (imgEl) {
-      imgEl.src = safeUrl(photo.src);
-      imgEl.alt = pick(photo.caption);
-    }
+    swapStageImage(imgEl, safeUrl(photo.src), pick(photo.caption));
     if (counterEl) counterEl.textContent = (prjState.photoIdx + 1) + ' / ' + active.photos.length;
     if (capEl) capEl.textContent = pick(photo.caption);
     document.querySelectorAll('#prj-detail .thumb-btn').forEach(function (btn) {
@@ -474,7 +510,7 @@
       const cascadeCls = animateEnter ? ' cascade-card' : '';
       return (
         '<button type="button" class="bento-prj-card black-showcase-card' + cascadeCls + (isAct ? ' active' : '') + '" style="--card-i:' + Math.min(idx, 6) + '" data-select-prj="' + p.id + '">' +
-          '<div class="bento-prj-thumb">' +
+          '<div class="bento-prj-thumb parallax-frame" data-scroll-parallax="0.16">' +
             '<img src="' + safeAttrUrl(p.photos[0].src) + '" alt="' + escapeHtml(p.title) + '" loading="lazy" />' +
             '<span class="bento-prj-badge">' + p.code + '</span>' +
             '<span class="bento-prj-count">' + p.photos.length + ' ' + escapeHtml(photosWord) + '</span>' +
@@ -493,7 +529,7 @@
     detailEl.innerHTML =
       '<div class="detail-sheet detail-sheet-wide' + (animateEnter ? ' detail-enter' : '') + '">' +
         '<div class="media-showcase">' +
-          '<div class="media-stage">' +
+          '<div class="media-stage parallax-frame" data-scroll-parallax="0.14">' +
             (active.photos.length > 1
               ? '<button type="button" class="stage-arrow prev" data-prj-step="-1" aria-label="Previous photo">' + ICONS.prev + '</button>' +
                 '<button type="button" class="stage-arrow next" data-prj-step="1" aria-label="Next photo">' + ICONS.next + '</button>'
@@ -541,6 +577,9 @@
           '</div>' +
         '</div>' +
       '</div>';
+
+    if (activeView === 'projects') refreshScrollReveals(detailEl);
+    if (typeof scheduleScrollParallaxUpdate === 'function') scheduleScrollParallaxUpdate();
   }
 
   /* ------------------------------------------------------------------------
@@ -572,7 +611,7 @@
       const cascadeCls = animateCards ? ' cascade-card' : '';
 
       return (
-        '<button type="button" class="cert-card interactive-card' + cascadeCls + (isFeatured ? ' featured-cert' : '') + '" style="--card-i:' + Math.min(idx, 7) + '" data-open-cert-idx="' + idx + '" aria-label="' + escapeHtml(hoverLabel + ': ' + title) + '">' +
+        '<button type="button" class="cert-card interactive-card scroll-reveal' + cascadeCls + (isFeatured ? ' featured-cert' : '') + '" style="--card-i:' + Math.min(idx, 7) + '; --reveal-i:' + (idx % 4) + '" data-open-cert-idx="' + idx + '" aria-label="' + escapeHtml(hoverLabel + ': ' + title) + '">' +
           '<div class="cert-frame">' +
             '<img src="' + safeAttrUrl(c.image) + '" alt="' + escapeHtml(title) + '" loading="lazy" />' +
             '<span class="cert-hover-pill">' + escapeHtml(hoverLabel) + '</span>' +
@@ -596,6 +635,8 @@
         '</button>'
       );
     }).join('');
+
+    if (activeView === 'certificates') refreshScrollReveals(gridEl);
   }
 
   /* ------------------------------------------------------------------------
@@ -608,9 +649,13 @@
     index: 0
   };
 
+  let lbOpener = null;
+  let cvOpener = null;
+
   function openLightbox(config) {
     const items = config.items || [];
     if (!items.length) return;
+    lbOpener = document.activeElement;
     lbState = {
       mode: config.mode || 'exp',
       recordId: config.recordId || null,
@@ -623,6 +668,8 @@
       modal.classList.add('open');
       modal.setAttribute('aria-hidden', 'false');
       document.body.style.overflow = 'hidden';
+      const closeBtn = document.getElementById('lb-close');
+      if (closeBtn) closeBtn.focus();
     }
   }
 
@@ -642,6 +689,10 @@
         prjState.photoIdx = lbState.index;
         updatePrjPhotoStage();
       }
+    }
+    if (lbOpener && typeof lbOpener.focus === 'function') {
+      try { lbOpener.focus(); } catch (_) {}
+      lbOpener = null;
     }
   }
 
@@ -734,11 +785,14 @@
      ------------------------------------------------------------------------ */
   function openCvModal() {
     closeMobileDrawer();
+    cvOpener = document.activeElement;
     const m = document.getElementById('cv-modal');
     if (m) {
       m.classList.add('open');
       m.setAttribute('aria-hidden', 'false');
       document.body.style.overflow = 'hidden';
+      const closeBtn = document.getElementById('cv-close');
+      if (closeBtn) closeBtn.focus();
     }
   }
 
@@ -748,6 +802,10 @@
       m.classList.remove('open');
       m.setAttribute('aria-hidden', 'true');
       document.body.style.overflow = '';
+      if (cvOpener && typeof cvOpener.focus === 'function') {
+        try { cvOpener.focus(); } catch (_) {}
+        cvOpener = null;
+      }
     }
   }
 
@@ -815,7 +873,9 @@
     pointerActive: false,
     pointerStrength: 0,
     lastTs: 0,
-    isDark: false
+    isDark: false,
+    scrollOffset: 0,
+    scrollVel: 0
   };
 
   function syncKineticTheme() {
@@ -860,10 +920,12 @@
     const h = kineticState.h;
     if (!ctx || !w || !h) return;
 
-    // Advance organic ambient phase + smooth damped layer-switch impulse
-    kineticState.phase += dt * 0.72 + kineticState.phaseImpulseVel * dt;
+    // Advance organic ambient phase + smooth damped layer-switch & scroll impulse
+    kineticState.phase += dt * 0.72 + kineticState.phaseImpulseVel * dt + kineticState.scrollVel * dt * 0.14;
     kineticState.phaseImpulseVel *= Math.pow(0.08, dt);
     if (Math.abs(kineticState.phaseImpulseVel) < 0.002) kineticState.phaseImpulseVel = 0;
+    kineticState.scrollVel *= Math.pow(0.04, dt);
+    if (Math.abs(kineticState.scrollVel) < 0.002) kineticState.scrollVel = 0;
 
     if (kineticState.ringAlpha > 0.004) {
       kineticState.ringRadius += dt * Math.max(w, h) * 0.85;
@@ -905,12 +967,14 @@
     const ringR = kineticState.ringRadius;
     const ringA = kineticState.ringAlpha;
 
+    const scrollParallaxY = isMobile ? 0 : (kineticState.scrollOffset * 0.09);
+
     // 1. Subtle Flowing Architectural Contour / Signal Lines (3 harmonic bands)
     const lineCount = isMobile ? 2 : 3;
     const stepX = isMobile ? 32 : 24;
     ctx.lineWidth = 1;
     for (let li = 0; li < lineCount; li++) {
-      const baseY = h * (0.24 + li * 0.27);
+      const baseY = h * (0.24 + li * 0.27) - (scrollParallaxY * (0.35 + li * 0.18) % (h * 0.45));
       const amp = (isMobile ? 16 : 24) + li * 6;
       const freq = 0.0024 + li * 0.0007;
       const speed = (li % 2 === 0 ? 1 : -0.82);
@@ -1121,7 +1185,116 @@
   }
 
   /* ------------------------------------------------------------------------
-     Gallery Wall in Motion: Multi-Depth Mosaic Parallax & Subtle Pointer Highlight
+     Multi-Layer 60fps Scroll Parallax & Architectural Progress Engine
+     - GPU-only custom properties (--bg-scroll-y, --grid-scroll-y, --sy, --media-py)
+     - Zero text parallax, zero scroll-jacking, zero layout shift (CLS = 0)
+     - Automatically simplified/disabled on mobile (< 768px) & prefers-reduced-motion
+     ------------------------------------------------------------------------ */
+  let scrollParallaxRaf = false;
+  let lastKnownScrollY = 0;
+
+  function resetAllScrollParallax() {
+    const ambientBg = document.getElementById('ambient-canvas-bg');
+    const depthGrid = document.getElementById('ambient-depth-grid');
+    if (ambientBg) ambientBg.style.setProperty('--bg-scroll-y', '0px');
+    if (depthGrid) depthGrid.style.setProperty('--grid-scroll-y', '0px');
+    document.querySelectorAll('.mosaic-tile .mosaic-parallax').forEach(function (inner) {
+      inner.style.setProperty('--sy', '0px');
+    });
+    document.querySelectorAll('.parallax-frame img').forEach(function (img) {
+      img.style.setProperty('--media-py', '0px');
+    });
+  }
+
+  function applyScrollParallaxFrame() {
+    scrollParallaxRaf = false;
+
+    const scrollY = window.scrollY || window.pageYOffset || 0;
+    const deltaY = scrollY - lastKnownScrollY;
+    lastKnownScrollY = scrollY;
+
+    const header = document.querySelector('.site-header');
+    if (header) header.classList.toggle('is-scrolled', scrollY > 12);
+
+    const progressBar = document.getElementById('scroll-progress-bar');
+    if (progressBar) {
+      const docH = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+      const ratio = docH > 24 ? Math.max(0, Math.min(1, scrollY / docH)) : 0;
+      progressBar.style.transform = 'scaleX(' + ratio.toFixed(4) + ')';
+    }
+
+    const canParallax = !prefersReducedMotion && hasFinePointer && window.innerWidth >= 768;
+    if (!canParallax) {
+      resetAllScrollParallax();
+      kineticState.scrollOffset = 0;
+      kineticState.scrollVel = 0;
+      return;
+    }
+
+    // Layer 1: Multi-depth ambient background lighting & architectural grid drift
+    const ambientBg = document.getElementById('ambient-canvas-bg');
+    if (ambientBg) {
+      const bgShift = Math.max(-90, Math.min(90, -scrollY * 0.065));
+      ambientBg.style.setProperty('--bg-scroll-y', bgShift.toFixed(2) + 'px');
+    }
+
+    const depthGrid = document.getElementById('ambient-depth-grid');
+    if (depthGrid) {
+      const gridShift = -((scrollY * 0.14) % 96);
+      depthGrid.style.setProperty('--grid-scroll-y', gridShift.toFixed(2) + 'px');
+    }
+
+    // Feed damped scroll momentum into the kinetic canvas contour field
+    kineticState.scrollOffset = scrollY;
+    kineticState.scrollVel = Math.max(-4.5, Math.min(4.5, kineticState.scrollVel + deltaY * 0.018));
+
+    const activeLayer = document.querySelector('.view-layer.active');
+    if (!activeLayer) return;
+
+    const vh = window.innerHeight || 900;
+
+    // Layer 2: Hero overlapping gallery mosaic multi-depth vertical scroll separation
+    if (activeLayer.id === 'view-home' && window.innerWidth >= 1024) {
+      const heroProgress = Math.min(scrollY, 680);
+      activeLayer.querySelectorAll('.mosaic-tile[data-parallax-depth]').forEach(function (tile) {
+        const depth = parseFloat(tile.getAttribute('data-parallax-depth')) || 0;
+        const inner = tile.querySelector('.mosaic-parallax');
+        if (inner) {
+          const sy = Math.max(-34, Math.min(34, -heroProgress * 0.055 * depth));
+          inner.style.setProperty('--sy', sy.toFixed(2) + 'px');
+        }
+      });
+    }
+
+    // Layer 3: Clipped visual media frames inner-image parallax across every active view
+    activeLayer.querySelectorAll('.parallax-frame[data-scroll-parallax]').forEach(function (frame) {
+      const rect = frame.getBoundingClientRect();
+      if (rect.bottom < -60 || rect.top > vh + 60) return;
+      const img = frame.querySelector('img');
+      if (!img) return;
+      const factor = parseFloat(frame.getAttribute('data-scroll-parallax')) || 0.14;
+      const center = rect.top + rect.height * 0.5;
+      const norm = Math.max(-1, Math.min(1, (center - vh * 0.5) / (vh * 0.65)));
+      const shiftY = Math.max(-12, Math.min(12, norm * 24 * factor));
+      img.style.setProperty('--media-py', shiftY.toFixed(2) + 'px');
+    });
+  }
+
+  function scheduleScrollParallaxUpdate() {
+    if (scrollParallaxRaf) return;
+    scrollParallaxRaf = true;
+    requestAnimationFrame(applyScrollParallaxFrame);
+  }
+
+  function initScrollParallax() {
+    lastKnownScrollY = window.scrollY || window.pageYOffset || 0;
+    window.addEventListener('scroll', scheduleScrollParallaxUpdate, { passive: true });
+    window.addEventListener('resize', scheduleScrollParallaxUpdate, { passive: true });
+    scheduleScrollParallaxUpdate();
+  }
+
+  /* ------------------------------------------------------------------------
+     Gallery Wall in Motion: Multi-Depth Mosaic Desktop Pointer Parallax
      ------------------------------------------------------------------------ */
   function initDesktopMotion() {
     if (prefersReducedMotion || !hasFinePointer) return;
@@ -1154,8 +1327,8 @@
         const normY = lastEvent.clientY / window.innerHeight - 0.5;
 
         if (isDesktop && homeLayer && homeLayer.classList.contains('active') && mosaicTiles.length) {
-          const maxShiftX = 22;
-          const maxShiftY = 16;
+          const maxShiftX = 18;
+          const maxShiftY = 14;
           mosaicTiles.forEach(function (tile) {
             const depth = parseFloat(tile.getAttribute('data-parallax-depth')) || 0;
             const inner = tile.querySelector('.mosaic-parallax');
@@ -1164,13 +1337,6 @@
               inner.style.setProperty('--py', (normY * maxShiftY * depth).toFixed(2) + 'px');
             }
           });
-        }
-
-        const card = lastEvent.target && lastEvent.target.closest ? lastEvent.target.closest('.interactive-card') : null;
-        if (card) {
-          const rect = card.getBoundingClientRect();
-          card.style.setProperty('--mx', (lastEvent.clientX - rect.left).toFixed(1) + 'px');
-          card.style.setProperty('--my', (lastEvent.clientY - rect.top).toFixed(1) + 'px');
         }
       });
     }, { passive: true });
@@ -1189,15 +1355,16 @@
     setLanguage(getStoredLang(), false);
     initScrollReveal();
     initKineticBackground();
+    initScrollParallax();
     initDesktopMotion();
 
     navigateTo(resolveViewFromHash(window.location.hash), false);
 
     if (document.fonts && document.fonts.ready) {
-      document.fonts.ready.then(updateNavSlider);
+      document.fonts.ready.then(function () { updateNavSlider(true); });
     }
     window.addEventListener('resize', function () {
-      requestAnimationFrame(updateNavSlider);
+      requestAnimationFrame(function () { updateNavSlider(true); });
     }, { passive: true });
 
     window.addEventListener('hashchange', function () {
