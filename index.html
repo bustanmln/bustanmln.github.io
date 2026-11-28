@@ -47,8 +47,10 @@
 <body>
   <a href="#main-content" class="skip-link">Skip to content</a>
 
-  <!-- Multi-Layer Living Monochrome Background: Ambient Gallery Lighting + Architectural Depth Grid + Kinetic Field -->
-  <div id="ambient-canvas-bg" class="ambient-canvas-bg" aria-hidden="true"></div>
+  <!-- Multi-Layer Living Monochrome Background: Breathing Ambient Gallery Light + Drafting Grid + Interactive Live Field -->
+  <div id="ambient-canvas-bg" class="ambient-canvas-bg" aria-hidden="true">
+    <div class="ambient-canvas-drift"></div>
+  </div>
   <div id="ambient-depth-grid" class="ambient-depth-grid" aria-hidden="true"></div>
   <canvas id="kinetic-bg-canvas" class="kinetic-bg-canvas" aria-hidden="true"></canvas>
 
@@ -527,12 +529,26 @@
               </p>
             </div>
 
-            <div class="filter-bar" role="group" aria-label="Filter certificates by category">
-              <span class="filter-glider" aria-hidden="true"></span>
-              <button type="button" class="filter-btn active" data-cert-filter="all" data-i18n="cert.filter.all">All (13)</button>
-              <button type="button" class="filter-btn" data-cert-filter="ai" data-i18n="cert.filter.ai">AI &amp; Cloud (3)</button>
-              <button type="button" class="filter-btn" data-cert-filter="iot" data-i18n="cert.filter.iot">IoT &amp; Code (5)</button>
-              <button type="button" class="filter-btn" data-cert-filter="leadership" data-i18n="cert.filter.leadership">Leadership &amp; Lab (5)</button>
+            <div class="cert-controls-cluster">
+              <div class="filter-bar" role="group" aria-label="Filter certificates by category">
+                <span class="filter-glider" aria-hidden="true"></span>
+                <button type="button" class="filter-btn active" data-cert-filter="all" data-i18n="cert.filter.all">All (13)</button>
+                <button type="button" class="filter-btn" data-cert-filter="ai" data-i18n="cert.filter.ai">AI &amp; Cloud (3)</button>
+                <button type="button" class="filter-btn" data-cert-filter="iot" data-i18n="cert.filter.iot">IoT &amp; Code (5)</button>
+                <button type="button" class="filter-btn" data-cert-filter="leadership" data-i18n="cert.filter.leadership">Leadership &amp; Lab (5)</button>
+              </div>
+
+              <div class="cert-view-switch" role="group" aria-label="Certificate layout view">
+                <span class="pill-glider" aria-hidden="true"></span>
+                <button type="button" class="cert-layout-btn active" data-cert-layout="bento" aria-pressed="true" title="Bento Gallery">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                  <span data-cert-layout-label="bento">Gallery</span>
+                </button>
+                <button type="button" class="cert-layout-btn" data-cert-layout="ledger" aria-pressed="false" title="Interactive Index">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                  <span data-cert-layout-label="ledger">Index</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>

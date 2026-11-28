@@ -99,6 +99,13 @@
     document.querySelectorAll('[data-lang-opt]').forEach(function (btn) {
       btn.setAttribute('aria-checked', btn.getAttribute('data-lang-opt') === currentLang ? 'true' : 'false');
     });
+
+    document.querySelectorAll('[data-cert-layout-label="bento"]').forEach(function (el) {
+      el.textContent = currentLang === 'id' ? 'Galeri' : 'Gallery';
+    });
+    document.querySelectorAll('[data-cert-layout-label="ledger"]').forEach(function (el) {
+      el.textContent = currentLang === 'id' ? 'Indeks' : 'Index';
+    });
   }
 
   const hydratedViews = {
@@ -248,9 +255,9 @@
   }
 
   function updateSwitchGliders(immediate) {
-    document.querySelectorAll('.lang-switch, .theme-switch').forEach(function (sw) {
+    document.querySelectorAll('.lang-switch, .theme-switch, .cert-view-switch').forEach(function (sw) {
       const glider = sw.querySelector('.pill-glider');
-      const active = sw.querySelector('[aria-checked="true"]');
+      const active = sw.querySelector('[aria-checked="true"], [aria-pressed="true"], .cert-layout-btn.active');
       glidePill(sw, glider, active, immediate, false);
     });
   }
@@ -298,6 +305,7 @@
 
   function applyActiveLayer(target) {
     ensureViewHydrated(target);
+    if (typeof hideCertFloatingPreview === 'function') hideCertFloatingPreview();
     VALID_VIEWS.forEach(function (v) {
       const layer = document.getElementById('view-' + v);
       if (!layer) return;
@@ -312,6 +320,7 @@
     if (typeof scheduleScrollParallaxUpdate === 'function') scheduleScrollParallaxUpdate();
     requestAnimationFrame(function () {
       updateNavSlider(false);
+      updateSwitchGliders(true);
       updateActiveFilterGlider(true);
     });
   }
@@ -472,20 +481,27 @@
     if (expState.photoIdx >= active.photos.length) expState.photoIdx = 0;
     const currentPhoto = active.photos[expState.photoIdx];
     const photosWord = t('common.photos');
+    const activeIdx = Math.max(0, filtered.findIndex(function (e) { return e.id === active.id; }));
+
+    listEl.classList.add('exp-timeline-rail');
+    listEl.style.setProperty('--exp-progress', ((activeIdx + 0.5) / Math.max(filtered.length, 1)).toFixed(3));
 
     listEl.innerHTML = filtered.map(function (e, idx) {
       const isAct = e.id === active.id;
       const cascadeCls = animateEnter ? ' cascade-card' : '';
       const tone = expTone(e.track);
       return (
-        '<button type="button" class="dir-card interactive-card' + cascadeCls + (isAct ? ' active' : '') + '" data-tone="' + tone + '" style="--card-i:' + Math.min(idx, 6) + '" data-select-exp="' + e.id + '">' +
-          '<div class="dir-thumb"><img src="' + safeAttrUrl(e.photos[0].src) + '" alt="' + escapeHtml(pick(e.role)) + '" loading="lazy" decoding="async" /></div>' +
-          '<div class="dir-meta">' +
-            '<div class="dir-top"><span class="dir-code">' + e.code + '</span><span>' + escapeHtml(pick(e.period)) + '</span></div>' +
-            '<div class="dir-title">' + escapeHtml(pick(e.role)) + '</div>' +
-            '<div class="dir-sub">' + escapeHtml(e.org) + ' · ' + e.photos.length + ' ' + escapeHtml(photosWord) + '</div>' +
-          '</div>' +
-        '</button>'
+        '<div class="exp-rail-item' + (isAct ? ' is-active' : '') + '">' +
+          '<span class="exp-node-dot" aria-hidden="true"></span>' +
+          '<button type="button" class="dir-card interactive-card' + cascadeCls + (isAct ? ' active' : '') + '" data-tone="' + tone + '" style="--card-i:' + Math.min(idx, 6) + '" data-select-exp="' + e.id + '">' +
+            '<div class="dir-thumb"><img src="' + safeAttrUrl(e.photos[0].src) + '" alt="' + escapeHtml(pick(e.role)) + '" loading="lazy" decoding="async" /></div>' +
+            '<div class="dir-meta">' +
+              '<div class="dir-top"><span class="dir-code">' + e.code + '</span><span>' + escapeHtml(pick(e.period)) + '</span></div>' +
+              '<div class="dir-title">' + escapeHtml(pick(e.role)) + '</div>' +
+              '<div class="dir-sub">' + escapeHtml(e.org) + ' · ' + e.photos.length + ' ' + escapeHtml(photosWord) + '</div>' +
+            '</div>' +
+          '</button>' +
+        '</div>'
       );
     }).join('');
 
@@ -531,7 +547,16 @@
           '<p class="detail-summary">' + escapeHtml(pick(active.summary)) + '</p>' +
           '<div>' +
             '<span class="datasheet-label">' + escapeHtml(t('exp.scopeHeading')) + '</span>' +
-            '<ul class="scope-list">' + bullets.map(function (b) { return '<li>' + escapeHtml(b) + '</li>'; }).join('') + '</ul>' +
+            '<ol class="scope-step-list">' +
+              bullets.map(function (b, bi) {
+                return (
+                  '<li class="scope-step-card" style="--step-i:' + bi + '">' +
+                    '<span class="scope-step-num">' + String(bi + 1).padStart(2, '0') + '</span>' +
+                    '<span>' + escapeHtml(b) + '</span>' +
+                  '</li>'
+                );
+              }).join('') +
+            '</ol>' +
           '</div>' +
           '<div class="tag-list">' + active.tags.map(function (tg) { return '<span class="tag">' + escapeHtml(tg) + '</span>'; }).join('') + '</div>' +
           '<div class="detail-footer">' +
@@ -598,12 +623,19 @@
       const isAct = p.id === active.id;
       const cascadeCls = animateEnter ? ' cascade-card' : '';
       const tone = prjTone(p.id, p.category);
+      const activeBadge = currentLang === 'id' ? 'AKTIF' : 'ACTIVE';
+      const hudHtml = p.metrics && p.metrics.length >= 2
+        ? '<div class="bento-hud-strip"><span>' + escapeHtml(pick(p.metrics[0].value)) + '</span><span>' + escapeHtml(pick(p.metrics[1].value)) + '</span></div>'
+        : '';
       return (
-        '<button type="button" class="bento-prj-card black-showcase-card interactive-card' + cascadeCls + (isAct ? ' active' : '') + '" data-tone="' + tone + '" style="--card-i:' + Math.min(idx, 6) + '" data-select-prj="' + p.id + '">' +
+        '<button type="button" class="bento-prj-card black-showcase-card interactive-card tilt-card' + cascadeCls + (isAct ? ' active' : '') + '" data-tone="' + tone + '" style="--card-i:' + Math.min(idx, 6) + '" data-select-prj="' + p.id + '">' +
+          '<span class="card-sheen" aria-hidden="true"></span>' +
           '<div class="bento-prj-thumb parallax-frame" data-scroll-parallax="0.16">' +
             '<img src="' + safeAttrUrl(p.photos[0].src) + '" alt="' + escapeHtml(p.title) + '" loading="lazy" decoding="async" />' +
             '<span class="bento-prj-badge">' + p.code + '</span>' +
+            '<span class="bento-prj-status">' + activeBadge + '</span>' +
             '<span class="bento-prj-count">' + p.photos.length + ' ' + escapeHtml(photosWord) + '</span>' +
+            hudHtml +
           '</div>' +
           '<div class="bento-prj-body">' +
             '<span class="bento-prj-cat">' + escapeHtml(pick(p.categoryLabel)) + '</span>' +
@@ -651,12 +683,13 @@
             '<p class="detail-summary" style="margin-top:0.5rem;">' + escapeHtml(pick(active.shortDesc)) + '</p>' +
           '</div>' +
           '<div class="metrics-grid">' +
-            active.metrics.map(function (m) {
-              return '<div class="metric-box"><span class="metric-k">' + escapeHtml(pick(m.label)) + '</span><span class="metric-v">' + escapeHtml(pick(m.value)) + '</span></div>';
+            active.metrics.map(function (m, mi) {
+              return '<div class="metric-box" style="--m-i:' + mi + '"><span class="metric-k">' + escapeHtml(pick(m.label)) + '</span><span class="metric-v">' + escapeHtml(pick(m.value)) + '</span></div>';
             }).join('') +
           '</div>' +
-          '<div class="datasheet-grid">' +
+          '<div class="arch-pipeline">' +
             '<div class="datasheet-box"><span class="datasheet-label">' + escapeHtml(t('prj.problemHeading')) + '</span><p>' + escapeHtml(pick(active.problem)) + '</p></div>' +
+            '<span class="arch-flow-badge" aria-hidden="true">&rarr;</span>' +
             '<div class="datasheet-box accent-box"><span class="datasheet-label">' + escapeHtml(t('prj.solutionHeading')) + '</span><p>' + escapeHtml(pick(active.solution)) + '</p></div>' +
           '</div>' +
           '<div>' +
@@ -680,9 +713,30 @@
   }
 
   /* ------------------------------------------------------------------------
-     Interactive Certificates Bento Registry (Featured Banner + 4-Col Grid)
+     Interactive Certificates Vault (Asymmetric Bento + Live-Preview Ledger)
      ------------------------------------------------------------------------ */
   let certFilter = 'all';
+  let certLayout = 'bento';
+  let certPreviewEl = null;
+  let certPreviewImg = null;
+
+  function ensureCertFloatingPreview() {
+    if (certPreviewEl) return certPreviewEl;
+    certPreviewEl = document.createElement('div');
+    certPreviewEl.id = 'cert-floating-preview';
+    certPreviewEl.className = 'cert-floating-preview';
+    certPreviewEl.setAttribute('aria-hidden', 'true');
+    certPreviewImg = document.createElement('img');
+    certPreviewImg.alt = '';
+    certPreviewImg.decoding = 'async';
+    certPreviewEl.appendChild(certPreviewImg);
+    document.body.appendChild(certPreviewEl);
+    return certPreviewEl;
+  }
+
+  function hideCertFloatingPreview() {
+    if (certPreviewEl) certPreviewEl.classList.remove('visible');
+  }
 
   function getFilteredCertificates() {
     if (certFilter === 'all') return CERTIFICATES;
@@ -693,10 +747,42 @@
     const gridEl = document.getElementById('certificates-grid');
     if (!gridEl) return;
 
+    hideCertFloatingPreview();
+
     const list = getFilteredCertificates();
     const hoverLabel = t('cert.hover');
     const viewLabel = t('cert.view');
     const featuredLabel = t('cert.featured');
+    const isLedger = certLayout === 'ledger';
+
+    gridEl.classList.toggle('is-ledger', isLedger);
+
+    if (isLedger) {
+      gridEl.innerHTML = list.map(function (c, idx) {
+        const title = pick(c.title);
+        const issuer = pick(c.issuer);
+        const date = pick(c.date);
+        const tag = pick(c.tag);
+        const cascadeCls = animateCards ? ' cascade-card' : '';
+        const tone = certTone(c.category);
+
+        return (
+          '<button type="button" class="cert-ledger-row' + cascadeCls + '" data-tone="' + tone + '" style="--card-i:' + Math.min(idx, 12) + '" data-open-cert-idx="' + idx + '" data-preview-src="' + safeAttrUrl(c.image) + '" data-preview-alt="' + escapeHtml(title) + '" aria-label="' + escapeHtml(hoverLabel + ': ' + title) + '">' +
+            '<span class="cert-ledger-num">#' + String(idx + 1).padStart(2, '0') + '</span>' +
+            '<span class="cert-ledger-main">' +
+              '<span class="cert-ledger-title">' + escapeHtml(title) + '</span>' +
+              '<span class="cert-ledger-sub">' + escapeHtml(issuer) + ' · ID: ' + escapeHtml(c.credId) + '</span>' +
+            '</span>' +
+            '<span class="cert-ledger-meta">' +
+              '<span class="tag tag-accent">' + escapeHtml(tag) + '</span>' +
+              '<span>' + escapeHtml(date) + '</span>' +
+              ICONS.expand +
+            '</span>' +
+          '</button>'
+        );
+      }).join('');
+      return;
+    }
 
     gridEl.innerHTML = list.map(function (c, idx) {
       const title = pick(c.title);
@@ -705,13 +791,16 @@
       const tag = pick(c.tag);
       const desc = pick(c.desc);
       const isFeatured = certFilter === 'all' && idx === 0;
+      const isBentoWide = certFilter === 'all' && (idx === 1 || idx === 2 || idx === 7 || idx === 8);
       const cascadeCls = animateCards ? ' cascade-card' : '';
-
+      const spanCls = isFeatured ? ' featured-cert' : (isBentoWide ? ' bento-wide' : '');
       const tone = certTone(c.category);
 
       return (
-        '<button type="button" class="cert-card interactive-card scroll-reveal' + cascadeCls + (isFeatured ? ' featured-cert' : '') + '" data-tone="' + tone + '" style="--card-i:' + Math.min(idx, 7) + '; --reveal-i:' + (idx % 4) + '" data-open-cert-idx="' + idx + '" aria-label="' + escapeHtml(hoverLabel + ': ' + title) + '">' +
+        '<button type="button" class="cert-card interactive-card tilt-card scroll-reveal' + cascadeCls + spanCls + '" data-tone="' + tone + '" style="--card-i:' + Math.min(idx, 9) + '; --reveal-i:' + (idx % 4) + '" data-open-cert-idx="' + idx + '" aria-label="' + escapeHtml(hoverLabel + ': ' + title) + '">' +
+          '<span class="card-sheen" aria-hidden="true"></span>' +
           '<div class="cert-frame">' +
+            '<span class="cert-index-stamp">#' + String(idx + 1).padStart(2, '0') + '</span>' +
             '<img src="' + safeAttrUrl(c.image) + '" alt="' + escapeHtml(title) + '" loading="lazy" decoding="async" />' +
             '<span class="cert-hover-pill">' + escapeHtml(hoverLabel) + '</span>' +
           '</div>' +
@@ -945,11 +1034,11 @@
   }
 
   /* ------------------------------------------------------------------------
-     Zero-Idle-CPU Technical Workspace Blueprint Canvas (Chrome 60fps Optimized)
-     - Replaces continuous 80,000-arc/sec Canvas2D loop with on-demand static
-       high-precision coordinate crosshairs + 3 harmonic signal curves
-     - Redraws ONLY on resize, theme switch, or brief damped layer-switch pulse
-     - Scrolls purely on GPU compositor via CSS transform (--canvas-scroll-y)
+     Live Interactive Studio Field Canvas (Continuous 60fps Batched Engine)
+     - 4-Bucket Batched Wave Dot-Matrix (~4 draw calls/frame vs 1,350 arcs!)
+     - Live Harmonic Contours + Autonomous Traveling Signal Pulse Packets
+     - Cursor Magnetic Displacement + Dynamic Proximity Constellation Web
+     - Interactive Click-to-Spawn Shockwave Ripples & Layer-Switch Surge
      ------------------------------------------------------------------------ */
   const kineticState = {
     canvas: null,
@@ -958,13 +1047,47 @@
     h: 0,
     dpr: 1,
     rafId: null,
-    pulseProgress: 0,
-    pulseDir: 1,
-    pulseStartTs: 0,
-    isDark: false
+    running: false,
+    lastTs: 0,
+    time: 0,
+    surgePhase: 0,
+    surgeVel: 0,
+    isDark: false,
+    pointerActive: false,
+    targetX: -9999,
+    targetY: -9999,
+    mx: -9999,
+    my: -9999,
+    ripples: [],
+    pulses: [
+      { line: 0, u: 0.12, speed: 0.085, dir: 1 },
+      { line: 1, u: 0.68, speed: 0.068, dir: -1 },
+      { line: 2, u: 0.36, speed: 0.076, dir: 1 },
+      { line: 0, u: 0.74, speed: 0.054, dir: -1 }
+    ]
   };
 
-  function drawTechnicalBlueprint(pulseT) {
+  function sampleHarmonicY(li, x, h, isMobile, t, phaseShift) {
+    const baseY = h * (0.21 + li * 0.28);
+    const amp = (isMobile ? 14 : 22) + li * 5;
+    const freq = 0.0022 + li * 0.00055;
+    let y = baseY
+      + Math.sin(x * freq + t * (0.72 + li * 0.14) + li * 1.7 + phaseShift) * amp
+      + Math.cos(x * freq * 0.56 - t * 0.48 - li + phaseShift * 0.6) * (amp * 0.44);
+
+    if (kineticState.pointerActive && !isMobile) {
+      const dx = x - kineticState.mx;
+      const dy = y - kineticState.my;
+      const d2 = dx * dx + dy * dy;
+      if (d2 < 36000) {
+        const pull = (1 - d2 / 36000);
+        y += (dy >= 0 ? 1 : -1) * pull * pull * 14;
+      }
+    }
+    return y;
+  }
+
+  function drawKineticFrame(dt) {
     const ctx = kineticState.ctx;
     const w = kineticState.w;
     const h = kineticState.h;
@@ -974,86 +1097,252 @@
 
     const dark = kineticState.isDark;
     const isMobile = w < 768;
-    const cobaltRgb = dark ? '79, 143, 247' : '29, 78, 216';
-    const tealRgb = dark ? '45, 212, 191' : '15, 118, 110';
-    const amberRgb = dark ? '251, 191, 36' : '180, 83, 9';
+    const t = kineticState.time;
+    const phase = kineticState.surgePhase;
 
-    // 1. Three lightweight harmonic signal contours (Cobalt, Teal, Amber)
-    const palettes = [cobaltRgb, tealRgb, amberRgb];
+    // Studio.Design Harmonized Exhibition Palette (Charcoal/Chalk + Mineral Sage + Warm Bronze + Steel)
+    const inkRgb = dark ? '243, 243, 243' : '34, 34, 34';
+    const sageRgb = dark ? '142, 187, 179' : '44, 88, 81';
+    const bronzeRgb = dark ? '212, 180, 131' : '116, 83, 41';
+    const steelRgb = dark ? '154, 178, 201' : '54, 77, 99';
+    const contourRgb = [sageRgb, bronzeRgb, steelRgb];
+
+    // Smooth cursor follow
+    if (kineticState.pointerActive) {
+      if (kineticState.mx < -1000) {
+        kineticState.mx = kineticState.targetX;
+        kineticState.my = kineticState.targetY;
+      } else {
+        const lerp = Math.min(1, dt * 11);
+        kineticState.mx += (kineticState.targetX - kineticState.mx) * lerp;
+        kineticState.my += (kineticState.targetY - kineticState.my) * lerp;
+      }
+    }
+
+    const mx = kineticState.mx;
+    const my = kineticState.my;
+    const ripples = kineticState.ripples;
+
+    // 1. Batched Live Wave Dot-Matrix (4 alpha buckets -> only 4 ctx.fill() calls/frame!)
+    const spacing = isMobile ? 58 : 44;
+    const b0 = [];
+    const b1 = [];
+    const b2 = [];
+    const b3 = [];
+    const nearNodes = [];
+    const cursorRadius = 148;
+    const cursorR2 = cursorRadius * cursorRadius;
+
+    for (let gx = spacing * 0.5; gx < w; gx += spacing) {
+      for (let gy = spacing * 0.5; gy < h; gy += spacing) {
+        const wave = Math.sin(gx * 0.0082 + t * 1.18 + phase) * 0.5
+          + Math.cos(gy * 0.0094 - t * 0.88 + phase * 0.65) * 0.5;
+        let px = gx + wave * 2.6;
+        let py = gy + Math.cos((gx + gy) * 0.006 + t * 0.95) * 2.6;
+        let boost = 0;
+
+        if (kineticState.pointerActive && !isMobile) {
+          const dx = px - mx;
+          const dy = py - my;
+          const d2 = dx * dx + dy * dy;
+          if (d2 < cursorR2 && d2 > 0.1) {
+            const dist = Math.sqrt(d2);
+            const f = 1 - dist / cursorRadius;
+            const push = f * f * 13;
+            px += (dx / dist) * push;
+            py += (dy / dist) * push;
+            boost += f * 0.85;
+            if (dist < 118 && nearNodes.length < 18) {
+              nearNodes.push({ x: px, y: py, f: f });
+            }
+          }
+        }
+
+        for (let ri = 0; ri < ripples.length; ri++) {
+          const rp = ripples[ri];
+          const rdx = px - rp.x;
+          const rdy = py - rp.y;
+          const rDist = Math.sqrt(rdx * rdx + rdy * rdy);
+          const band = Math.abs(rDist - rp.r);
+          if (band < 42 && rDist > 0.1) {
+            const rf = (1 - band / 42) * rp.alpha;
+            px += (rdx / rDist) * rf * 10;
+            py += (rdy / rDist) * rf * 10;
+            boost += rf * 0.9;
+          }
+        }
+
+        const energy = (wave + 1) * 0.36 + boost;
+        if (energy > 0.88) b3.push(px, py);
+        else if (energy > 0.56) b2.push(px, py);
+        else if (energy > 0.28) b1.push(px, py);
+        else b0.push(px, py);
+      }
+    }
+
+    const buckets = [
+      { arr: b0, size: 1.4, rgb: inkRgb, alpha: dark ? 0.055 : 0.048 },
+      { arr: b1, size: 1.7, rgb: inkRgb, alpha: dark ? 0.105 : 0.088 },
+      { arr: b2, size: 2.0, rgb: inkRgb, alpha: dark ? 0.175 : 0.145 },
+      { arr: b3, size: 2.5, rgb: sageRgb, alpha: dark ? 0.36 : 0.28 }
+    ];
+
+    for (let bi = 0; bi < buckets.length; bi++) {
+      const bk = buckets[bi];
+      const pts = bk.arr;
+      if (!pts.length) continue;
+      const hs = bk.size * 0.5;
+      ctx.beginPath();
+      for (let i = 0; i < pts.length; i += 2) {
+        ctx.rect(pts[i] - hs, pts[i + 1] - hs, bk.size, bk.size);
+      }
+      ctx.fillStyle = 'rgba(' + bk.rgb + ', ' + bk.alpha + ')';
+      ctx.fill();
+    }
+
+    // 2. Interactive Proximity Constellation Web & Precision Cursor Reticle (Desktop)
+    if (kineticState.pointerActive && !isMobile && nearNodes.length) {
+      ctx.beginPath();
+      for (let i = 0; i < nearNodes.length; i++) {
+        const a = nearNodes[i];
+        if (a.f > 0.32) {
+          ctx.moveTo(mx, my);
+          ctx.lineTo(a.x, a.y);
+        }
+        for (let j = i + 1; j < nearNodes.length; j++) {
+          const b = nearNodes[j];
+          const ndx = a.x - b.x;
+          const ndy = a.y - b.y;
+          if (ndx * ndx + ndy * ndy < 6400) {
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(b.x, b.y);
+          }
+        }
+      }
+      ctx.lineWidth = 0.85;
+      ctx.strokeStyle = 'rgba(' + inkRgb + ', ' + (dark ? 0.15 : 0.115) + ')';
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(mx, my, 16 + Math.sin(t * 2.6) * 2, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(' + sageRgb + ', ' + (dark ? 0.22 : 0.16) + ')';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+
+    // 3. Three Live Harmonic Signal Contours + Autonomous Traveling Telemetry Packets
     const lineCount = isMobile ? 2 : 3;
-    const stepX = isMobile ? 36 : 24;
-    const phaseShift = pulseT * kineticState.pulseDir * 1.35;
+    const stepX = isMobile ? 34 : 22;
     ctx.lineWidth = 1;
 
     for (let li = 0; li < lineCount; li++) {
-      const baseY = h * (0.22 + li * 0.28);
-      const amp = (isMobile ? 14 : 22) + li * 5;
-      const freq = 0.0022 + li * 0.0006;
       ctx.beginPath();
       for (let x = 0; x <= w + stepX; x += stepX) {
-        const y = baseY
-          + Math.sin(x * freq + li * 1.6 + phaseShift) * amp
-          + Math.cos(x * freq * 0.55 - li + phaseShift * 0.6) * (amp * 0.42);
+        const y = sampleHarmonicY(li, x, h, isMobile, t, phase);
         if (x === 0) ctx.moveTo(x, y);
         else ctx.lineTo(x, y);
       }
-      ctx.strokeStyle = 'rgba(' + palettes[li] + ', ' + (dark ? 0.13 : 0.095) + ')';
+      ctx.strokeStyle = 'rgba(' + contourRgb[li] + ', ' + (dark ? 0.155 : 0.115) + ')';
       ctx.stroke();
     }
 
-    // 2. Sparse architectural registration crosshairs at major 192px intersections
-    if (!isMobile) {
-      const gridStep = 192;
-      const arm = 4;
-      ctx.strokeStyle = 'rgba(' + cobaltRgb + ', ' + (dark ? 0.2 : 0.14) + ')';
+    // Traveling luminous signal packets along the contours
+    for (let pi = 0; pi < kineticState.pulses.length; pi++) {
+      const p = kineticState.pulses[pi];
+      if (p.line >= lineCount) continue;
+      p.u += p.speed * p.dir * dt;
+      if (p.u > 1.08) p.u = -0.08;
+      else if (p.u < -0.08) p.u = 1.08;
+
+      const headX = p.u * w;
+      const tailLen = isMobile ? 48 : 78;
       ctx.beginPath();
-      for (let gx = gridStep * 0.5; gx < w; gx += gridStep) {
-        for (let gy = gridStep * 0.5; gy < h; gy += gridStep) {
-          ctx.moveTo(gx - arm, gy);
-          ctx.lineTo(gx + arm, gy);
-          ctx.moveTo(gx, gy - arm);
-          ctx.lineTo(gx, gy + arm);
-        }
+      for (let s = 0; s <= 6; s++) {
+        const sx = headX - p.dir * (s / 6) * tailLen;
+        const sy = sampleHarmonicY(p.line, sx, h, isMobile, t, phase);
+        if (s === 0) ctx.moveTo(sx, sy);
+        else ctx.lineTo(sx, sy);
       }
+      ctx.strokeStyle = 'rgba(' + contourRgb[p.line] + ', ' + (dark ? 0.42 : 0.34) + ')';
+      ctx.lineWidth = 1.65;
       ctx.stroke();
+
+      const headY = sampleHarmonicY(p.line, headX, h, isMobile, t, phase);
+      ctx.beginPath();
+      ctx.arc(headX, headY, 2.6, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(' + contourRgb[p.line] + ', ' + (dark ? 0.72 : 0.58) + ')';
+      ctx.fill();
     }
 
-    // 3. Optional brief layer-switch expanding pulse ring (auto-stops in 420ms -> 0% idle CPU)
-    if (pulseT > 0.001 && pulseT < 1) {
-      const ease = 1 - Math.pow(1 - pulseT, 3);
-      const r = 40 + ease * Math.max(w, h) * 0.52;
-      const alpha = (1 - ease) * (dark ? 0.22 : 0.16);
+    // 4. Interactive Click Shockwave Ripples
+    for (let ri = ripples.length - 1; ri >= 0; ri--) {
+      const rp = ripples[ri];
+      rp.r += dt * 340;
+      rp.alpha = Math.max(0, 1 - rp.r / rp.maxR);
+      if (rp.alpha <= 0.015) {
+        ripples.splice(ri, 1);
+        continue;
+      }
       ctx.beginPath();
-      ctx.arc(w * 0.5, h * 0.42, r, 0, Math.PI * 2);
-      ctx.strokeStyle = 'rgba(' + cobaltRgb + ', ' + alpha.toFixed(3) + ')';
-      ctx.lineWidth = 1.25;
+      ctx.arc(rp.x, rp.y, rp.r, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(' + bronzeRgb + ', ' + (rp.alpha * (dark ? 0.28 : 0.22)).toFixed(3) + ')';
+      ctx.lineWidth = 1.2;
       ctx.stroke();
     }
+  }
+
+  function stepKineticLoop(ts) {
+    if (!kineticState.running) return;
+    if (!kineticState.lastTs) kineticState.lastTs = ts;
+    const dt = Math.min(0.05, Math.max(0.001, (ts - kineticState.lastTs) / 1000));
+    kineticState.lastTs = ts;
+
+    kineticState.time += dt;
+    if (Math.abs(kineticState.surgeVel) > 0.001) {
+      kineticState.surgePhase += kineticState.surgeVel * dt * 6;
+      kineticState.surgeVel *= Math.pow(0.04, dt);
+    }
+
+    drawKineticFrame(dt);
+    kineticState.rafId = requestAnimationFrame(stepKineticLoop);
+  }
+
+  function startKineticLoop() {
+    if (prefersReducedMotion || document.hidden || kineticState.running || !kineticState.ctx) return;
+    kineticState.running = true;
+    kineticState.lastTs = 0;
+    kineticState.rafId = requestAnimationFrame(stepKineticLoop);
+  }
+
+  function stopKineticLoop() {
+    kineticState.running = false;
+    if (kineticState.rafId) {
+      cancelAnimationFrame(kineticState.rafId);
+      kineticState.rafId = null;
+    }
+  }
+
+  function spawnKineticRipple(x, y, maxScale) {
+    if (prefersReducedMotion || !kineticState.w) return;
+    if (kineticState.ripples.length >= 4) kineticState.ripples.shift();
+    kineticState.ripples.push({
+      x: x,
+      y: y,
+      r: 8,
+      maxR: Math.max(kineticState.w, kineticState.h) * (maxScale || 0.36),
+      alpha: 1
+    });
   }
 
   function syncKineticTheme() {
     kineticState.isDark = document.documentElement.classList.contains('dark');
-    drawTechnicalBlueprint(0);
+    if (!kineticState.running) drawKineticFrame(0.016);
   }
 
   function triggerKineticImpulse(direction) {
     if (prefersReducedMotion || !kineticState.ctx) return;
-    if (kineticState.rafId) cancelAnimationFrame(kineticState.rafId);
-    kineticState.pulseDir = direction >= 0 ? 1 : -1;
-    kineticState.pulseStartTs = 0;
-
-    const stepPulse = function (ts) {
-      if (!kineticState.pulseStartTs) kineticState.pulseStartTs = ts;
-      const p = Math.min((ts - kineticState.pulseStartTs) / 420, 1);
-      drawTechnicalBlueprint(p);
-      if (p < 1) {
-        kineticState.rafId = requestAnimationFrame(stepPulse);
-      } else {
-        kineticState.rafId = null;
-        drawTechnicalBlueprint(0);
-      }
-    };
-    kineticState.rafId = requestAnimationFrame(stepPulse);
+    kineticState.surgeVel = (direction >= 0 ? 1 : -1) * 1.45;
+    spawnKineticRipple(kineticState.w * 0.5, kineticState.h * 0.42, 0.48);
   }
 
   function resizeKineticCanvas() {
@@ -1061,7 +1350,7 @@
     if (!canvas) return;
     const w = window.innerWidth;
     const h = window.innerHeight;
-    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.35);
     kineticState.w = w;
     kineticState.h = h;
     kineticState.dpr = dpr;
@@ -1071,7 +1360,7 @@
     canvas.style.height = h + 'px';
     if (kineticState.ctx) {
       kineticState.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      drawTechnicalBlueprint(0);
+      drawKineticFrame(0.016);
     }
   }
 
@@ -1082,6 +1371,18 @@
     kineticState.ctx = canvas.getContext('2d');
     kineticState.isDark = document.documentElement.classList.contains('dark');
     resizeKineticCanvas();
+
+    if (!prefersReducedMotion) {
+      startKineticLoop();
+      document.addEventListener('visibilitychange', function () {
+        if (document.hidden) stopKineticLoop();
+        else startKineticLoop();
+      });
+      document.addEventListener('pointerdown', function (e) {
+        if (e.button !== undefined && e.button !== 0) return;
+        spawnKineticRipple(e.clientX, e.clientY, 0.34);
+      }, { passive: true });
+    }
 
     let resizeTimer = null;
     window.addEventListener('resize', function () {
@@ -1265,8 +1566,9 @@
   }
 
   /* ------------------------------------------------------------------------
-     Unified Desktop Pointer Loop (Mosaic Depth + Lightweight Card Spotlight)
-     - Runs ONLY on pointermove (0% idle CPU), disabled on touch/mobile
+     Unified Desktop Pointer Engine
+     - Feeds Live Background Cursor Field + Mosaic Depth + Card Spotlight
+     - 3D Collector Tilt + Foil Sheen (.tilt-card) & Ledger Floating Preview
      ------------------------------------------------------------------------ */
   function initDesktopMotion() {
     if (prefersReducedMotion || !hasFinePointer) return;
@@ -1277,8 +1579,23 @@
     let pointerY = 0;
     let hoveredCard = null;
     let hoveredRect = null;
+    let hoveredTilt = null;
+    let hoveredTiltRect = null;
+    let hoveredLedger = null;
+
+    function resetTiltCard(el) {
+      if (!el) return;
+      el.style.setProperty('--rx', '0deg');
+      el.style.setProperty('--ry', '0deg');
+    }
 
     function resetMosaicParallax() {
+      kineticState.pointerActive = false;
+      resetTiltCard(hoveredTilt);
+      hoveredTilt = null;
+      hoveredTiltRect = null;
+      hoveredLedger = null;
+      hideCertFloatingPreview();
       cachedMosaicItems.forEach(function (m) {
         m.inner.style.setProperty('--px', '0px');
         m.inner.style.setProperty('--py', '0px');
@@ -1286,20 +1603,50 @@
     }
 
     document.addEventListener('pointerover', function (e) {
-      const card = e.target && e.target.closest ? e.target.closest('.interactive-card') : null;
+      const target = e.target && e.target.closest ? e.target : null;
+      const card = target ? target.closest('.interactive-card') : null;
       if (card !== hoveredCard) {
         hoveredCard = card;
         hoveredRect = card ? card.getBoundingClientRect() : null;
+      }
+
+      const tilt = target ? target.closest('.tilt-card') : null;
+      if (tilt !== hoveredTilt) {
+        resetTiltCard(hoveredTilt);
+        hoveredTilt = tilt;
+        hoveredTiltRect = tilt ? tilt.getBoundingClientRect() : null;
+      }
+
+      const row = target ? target.closest('.cert-ledger-row') : null;
+      if (row !== hoveredLedger) {
+        hoveredLedger = row;
+        if (row && window.innerWidth >= 1024) {
+          const preview = ensureCertFloatingPreview();
+          const src = row.getAttribute('data-preview-src');
+          if (src && certPreviewImg && certPreviewImg.getAttribute('src') !== src) {
+            certPreviewImg.setAttribute('src', src);
+            certPreviewImg.setAttribute('alt', row.getAttribute('data-preview-alt') || '');
+          }
+          preview.classList.add('visible');
+        } else {
+          hideCertFloatingPreview();
+        }
       }
     }, { passive: true });
 
     window.addEventListener('scroll', function () {
       if (hoveredCard) hoveredRect = null;
+      if (hoveredTilt) hoveredTiltRect = null;
+      if (hoveredLedger) hideCertFloatingPreview();
     }, { passive: true });
 
     document.addEventListener('pointermove', function (e) {
       pointerX = e.clientX;
       pointerY = e.clientY;
+      kineticState.targetX = pointerX;
+      kineticState.targetY = pointerY;
+      kineticState.pointerActive = true;
+
       if (rafPending) return;
       rafPending = true;
       requestAnimationFrame(function () {
@@ -1320,13 +1667,35 @@
           hoveredCard.style.setProperty('--mx', (pointerX - hoveredRect.left).toFixed(0) + 'px');
           hoveredCard.style.setProperty('--my', (pointerY - hoveredRect.top).toFixed(0) + 'px');
         }
+
+        if (hoveredTilt) {
+          if (!hoveredTiltRect) hoveredTiltRect = hoveredTilt.getBoundingClientRect();
+          const w = Math.max(hoveredTiltRect.width, 1);
+          const h = Math.max(hoveredTiltRect.height, 1);
+          const nx = Math.max(-0.5, Math.min(0.5, (pointerX - hoveredTiltRect.left) / w - 0.5));
+          const ny = Math.max(-0.5, Math.min(0.5, (pointerY - hoveredTiltRect.top) / h - 0.5));
+          hoveredTilt.style.setProperty('--rx', (-ny * 8.5).toFixed(2) + 'deg');
+          hoveredTilt.style.setProperty('--ry', (nx * 9.5).toFixed(2) + 'deg');
+          hoveredTilt.style.setProperty('--sheen-x', (nx * 44).toFixed(1) + '%');
+          hoveredTilt.style.setProperty('--sheen-y', (ny * 44).toFixed(1) + '%');
+        }
+
+        if (hoveredLedger && certPreviewEl && window.innerWidth >= 1024) {
+          const fx = Math.min(window.innerWidth - 310, Math.max(16, pointerX + 24));
+          const fy = Math.min(window.innerHeight - 215, Math.max(16, pointerY - 96));
+          certPreviewEl.style.setProperty('--fp-x', fx.toFixed(0) + 'px');
+          certPreviewEl.style.setProperty('--fp-y', fy.toFixed(0) + 'px');
+        }
       });
     }, { passive: true });
 
     document.addEventListener('pointerleave', resetMosaicParallax, { passive: true });
     window.addEventListener('resize', function () {
       hoveredRect = null;
-      if (window.innerWidth < 1024) resetMosaicParallax();
+      hoveredTiltRect = null;
+      if (window.innerWidth < 1024) {
+        resetMosaicParallax();
+      }
     }, { passive: true });
   }
 
@@ -1442,6 +1811,24 @@
         updateFilterGliderIn(certFilterBtn.closest('.filter-bar'), false);
         hydratedViews.certificates = true;
         renderCertificatesView(true);
+        return;
+      }
+
+      // Certificate layout switcher (Asymmetric Bento vs Interactive Index Ledger)
+      const certLayoutBtn = e.target.closest('[data-cert-layout]');
+      if (certLayoutBtn) {
+        const nextLayout = certLayoutBtn.getAttribute('data-cert-layout') === 'ledger' ? 'ledger' : 'bento';
+        if (nextLayout !== certLayout) {
+          certLayout = nextLayout;
+          document.querySelectorAll('[data-cert-layout]').forEach(function (b) {
+            const isAct = b === certLayoutBtn;
+            b.classList.toggle('active', isAct);
+            b.setAttribute('aria-pressed', isAct ? 'true' : 'false');
+          });
+          updateSwitchGliders(false);
+          hydratedViews.certificates = true;
+          renderCertificatesView(true);
+        }
         return;
       }
 
