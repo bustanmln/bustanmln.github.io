@@ -101,24 +101,68 @@
     });
   }
 
+  const hydratedViews = {
+    home: true,
+    experience: false,
+    projects: false,
+    certificates: false,
+    contact: true
+  };
+
+  function expTone(track) {
+    if (track === 'industrial') return 'amber';
+    if (track === 'community') return 'teal';
+    return 'cobalt';
+  }
+
+  function prjTone(id, category) {
+    if (id === 'prj-sipesat') return 'teal';
+    if (id === 'prj-iot-power') return 'sky';
+    if (id === 'prj-agv') return 'amber';
+    return category === 'iot' ? 'teal' : 'cobalt';
+  }
+
+  function certTone(category) {
+    if (category === 'ai') return 'sky';
+    if (category === 'iot') return 'teal';
+    return 'amber';
+  }
+
+  function ensureViewHydrated(viewId) {
+    if (viewId === 'experience' && !hydratedViews.experience) {
+      hydratedViews.experience = true;
+      renderExperienceView(false);
+    } else if (viewId === 'projects' && !hydratedViews.projects) {
+      hydratedViews.projects = true;
+      renderProjectsView(false);
+    } else if (viewId === 'certificates' && !hydratedViews.certificates) {
+      hydratedViews.certificates = true;
+      renderCertificatesView(false);
+    }
+  }
+
   function setLanguage(lang, persist) {
     currentLang = lang === 'id' ? 'id' : 'en';
     if (persist) {
       try { localStorage.setItem(LANG_KEY, currentLang); } catch (_) {}
     }
 
-    // Translate static & dynamic UI in-place WITHOUT changing active layer, scroll, or open modals
+    // Translate static & already-hydrated dynamic UI in-place WITHOUT decoding hidden galleries
     applyStaticTranslations();
-    renderExperienceView(false);
-    renderProjectsView(false);
-    renderCertificatesView();
+    if (hydratedViews.experience) renderExperienceView(false);
+    if (hydratedViews.projects) renderProjectsView(false);
+    if (hydratedViews.certificates) renderCertificatesView(false);
 
     const lbModal = document.getElementById('lightbox-modal');
     if (lbModal && lbModal.classList.contains('open')) {
       renderLightboxFrame();
     }
 
-    requestAnimationFrame(function () { updateNavSlider(true); });
+    requestAnimationFrame(function () {
+      updateNavSlider(true);
+      updateSwitchGliders(!persist);
+      updateActiveFilterGlider(true);
+    });
   }
 
   function copyToClipboard(text, btnEl) {
@@ -153,43 +197,77 @@
   }
 
   /* ------------------------------------------------------------------------
-     Pixel-Exact GPU-Only FLIP Sliding Desktop Nav Indicator (Zero width transition)
+     Universal GPU-Only FLIP Gliding Pill Engine (Nav, Filters, Lang & Theme)
      ------------------------------------------------------------------------ */
-  let navSliderPrev = null;
+  const gliderCache = new WeakMap();
+
+  function glidePill(container, glider, activeEl, immediate, setHeight) {
+    if (!container || !glider) return;
+    if (!activeEl || container.offsetParent === null) {
+      glider.style.opacity = '0';
+      return;
+    }
+    const cRect = container.getBoundingClientRect();
+    const aRect = activeEl.getBoundingClientRect();
+    const nextX = aRect.left - cRect.left - container.clientLeft;
+    const nextY = setHeight ? (aRect.top - cRect.top - container.clientTop) : 0;
+    const nextW = Math.max(aRect.width, 1);
+    const nextH = Math.max(aRect.height, 1);
+    const prev = gliderCache.get(glider);
+
+    container.setAttribute('data-glider-ready', 'true');
+
+    if (prev && !immediate && !prefersReducedMotion && (Math.abs(prev.x - nextX) > 0.5 || Math.abs(prev.y - nextY) > 0.5 || Math.abs(prev.w - nextW) > 0.5)) {
+      const ratioX = prev.w / nextW;
+      glider.style.transition = 'none';
+      glider.style.width = nextW.toFixed(1) + 'px';
+      if (setHeight) glider.style.height = nextH.toFixed(1) + 'px';
+      glider.style.transform = 'translate3d(' + prev.x.toFixed(1) + 'px, ' + (setHeight ? (prev.y - 4).toFixed(1) : '0') + 'px, 0) scaleX(' + ratioX.toFixed(4) + ')';
+      glider.style.opacity = '1';
+      void glider.offsetWidth;
+      glider.style.transition = '';
+      glider.style.transform = 'translate3d(' + nextX.toFixed(1) + 'px, ' + (setHeight ? (nextY - 4).toFixed(1) : '0') + 'px, 0) scaleX(1)';
+    } else {
+      glider.style.transition = 'none';
+      glider.style.width = nextW.toFixed(1) + 'px';
+      if (setHeight) glider.style.height = nextH.toFixed(1) + 'px';
+      glider.style.transform = 'translate3d(' + nextX.toFixed(1) + 'px, ' + (setHeight ? (nextY - 4).toFixed(1) : '0') + 'px, 0) scaleX(1)';
+      glider.style.opacity = '1';
+      void glider.offsetWidth;
+      glider.style.transition = '';
+    }
+
+    gliderCache.set(glider, { x: nextX, y: nextY, w: nextW, h: nextH });
+  }
 
   function updateNavSlider(immediate) {
     const shell = document.getElementById('desktop-nav-shell');
     const slider = document.getElementById('nav-slider');
     if (!shell || !slider) return;
-    const activeLink = shell.querySelector('.nav-item.active');
-    if (!activeLink || shell.offsetParent === null) {
-      slider.style.opacity = '0';
-      return;
-    }
-    const shellRect = shell.getBoundingClientRect();
-    const linkRect = activeLink.getBoundingClientRect();
-    const nextX = linkRect.left - shellRect.left - shell.clientLeft;
-    const nextW = Math.max(linkRect.width, 1);
+    glidePill(shell, slider, shell.querySelector('.nav-item.active'), immediate, false);
+  }
 
-    if (navSliderPrev && !immediate && !prefersReducedMotion && (Math.abs(navSliderPrev.x - nextX) > 0.5 || Math.abs(navSliderPrev.w - nextW) > 0.5)) {
-      const ratio = navSliderPrev.w / nextW;
-      slider.style.transition = 'none';
-      slider.style.width = nextW.toFixed(1) + 'px';
-      slider.style.transform = 'translate3d(' + navSliderPrev.x.toFixed(1) + 'px, 0, 0) scaleX(' + ratio.toFixed(4) + ')';
-      slider.style.opacity = '1';
-      void slider.offsetWidth;
-      slider.style.transition = '';
-      slider.style.transform = 'translate3d(' + nextX.toFixed(1) + 'px, 0, 0) scaleX(1)';
-    } else {
-      slider.style.transition = 'none';
-      slider.style.width = nextW.toFixed(1) + 'px';
-      slider.style.transform = 'translate3d(' + nextX.toFixed(1) + 'px, 0, 0) scaleX(1)';
-      slider.style.opacity = '1';
-      void slider.offsetWidth;
-      slider.style.transition = '';
-    }
+  function updateSwitchGliders(immediate) {
+    document.querySelectorAll('.lang-switch, .theme-switch').forEach(function (sw) {
+      const glider = sw.querySelector('.pill-glider');
+      const active = sw.querySelector('[aria-checked="true"]');
+      glidePill(sw, glider, active, immediate, false);
+    });
+  }
 
-    navSliderPrev = { x: nextX, w: nextW };
+  function updateFilterGliderIn(bar, immediate) {
+    if (!bar) return;
+    const glider = bar.querySelector('.filter-glider');
+    const active = bar.querySelector('.filter-btn.active');
+    glidePill(bar, glider, active, immediate, true);
+  }
+
+  function updateActiveFilterGlider(immediate) {
+    const activeLayer = document.querySelector('.view-layer.active');
+    if (!activeLayer) return;
+    activeLayer.querySelectorAll('.filter-bar').forEach(function (bar) {
+      updateFilterGliderIn(bar, immediate);
+    });
   }
 
   /* ------------------------------------------------------------------------
@@ -219,6 +297,7 @@
   }
 
   function applyActiveLayer(target) {
+    ensureViewHydrated(target);
     VALID_VIEWS.forEach(function (v) {
       const layer = document.getElementById('view-' + v);
       if (!layer) return;
@@ -229,8 +308,12 @@
     window.scrollTo(0, 0);
     const targetLayer = document.getElementById('view-' + target);
     if (targetLayer) refreshScrollReveals(targetLayer);
+    if (typeof cacheParallaxMetrics === 'function') cacheParallaxMetrics();
     if (typeof scheduleScrollParallaxUpdate === 'function') scheduleScrollParallaxUpdate();
-    requestAnimationFrame(function () { updateNavSlider(false); });
+    requestAnimationFrame(function () {
+      updateNavSlider(false);
+      updateActiveFilterGlider(true);
+    });
   }
 
   function navigateTo(viewId, updateHash) {
@@ -315,6 +398,7 @@
       btn.setAttribute('aria-checked', btn.getAttribute('data-theme-opt') === valid ? 'true' : 'false');
     });
 
+    requestAnimationFrame(function () { updateSwitchGliders(!persist); });
     if (typeof syncKineticTheme === 'function') syncKineticTheme();
   }
 
@@ -392,9 +476,10 @@
     listEl.innerHTML = filtered.map(function (e, idx) {
       const isAct = e.id === active.id;
       const cascadeCls = animateEnter ? ' cascade-card' : '';
+      const tone = expTone(e.track);
       return (
-        '<button type="button" class="dir-card interactive-card' + cascadeCls + (isAct ? ' active' : '') + '" style="--card-i:' + Math.min(idx, 6) + '" data-select-exp="' + e.id + '">' +
-          '<div class="dir-thumb"><img src="' + safeAttrUrl(e.photos[0].src) + '" alt="' + escapeHtml(pick(e.role)) + '" loading="lazy" /></div>' +
+        '<button type="button" class="dir-card interactive-card' + cascadeCls + (isAct ? ' active' : '') + '" data-tone="' + tone + '" style="--card-i:' + Math.min(idx, 6) + '" data-select-exp="' + e.id + '">' +
+          '<div class="dir-thumb"><img src="' + safeAttrUrl(e.photos[0].src) + '" alt="' + escapeHtml(pick(e.role)) + '" loading="lazy" decoding="async" /></div>' +
           '<div class="dir-meta">' +
             '<div class="dir-top"><span class="dir-code">' + e.code + '</span><span>' + escapeHtml(pick(e.period)) + '</span></div>' +
             '<div class="dir-title">' + escapeHtml(pick(e.role)) + '</div>' +
@@ -409,16 +494,17 @@
     }).join('');
 
     const bullets = pick(active.bullets);
+    const activeTone = expTone(active.track);
 
     detailEl.innerHTML =
-      '<div class="detail-sheet detail-sheet-wide' + (animateEnter ? ' detail-enter' : '') + '">' +
+      '<div class="detail-sheet detail-sheet-wide' + (animateEnter ? ' detail-enter' : '') + '" data-tone="' + activeTone + '">' +
         '<div class="media-showcase">' +
           '<div class="media-stage parallax-frame" data-scroll-parallax="0.14">' +
             (active.photos.length > 1
               ? '<button type="button" class="stage-arrow prev" data-exp-step="-1" aria-label="Previous photo">' + ICONS.prev + '</button>' +
                 '<button type="button" class="stage-arrow next" data-exp-step="1" aria-label="Next photo">' + ICONS.next + '</button>'
               : '') +
-            '<img id="exp-stage-img" src="' + safeAttrUrl(currentPhoto.src) + '" alt="' + escapeHtml(pick(currentPhoto.caption)) + '" data-open-exp-lb="true" />' +
+            '<img id="exp-stage-img" src="' + safeAttrUrl(currentPhoto.src) + '" alt="' + escapeHtml(pick(currentPhoto.caption)) + '" decoding="async" data-open-exp-lb="true" />' +
             '<span id="exp-stage-counter" class="stage-counter">' + (expState.photoIdx + 1) + ' / ' + active.photos.length + '</span>' +
             '<button type="button" class="stage-expand-btn" data-open-exp-lb="true">' + ICONS.expand + '<span>' + escapeHtml(t('common.fullscreen')) + '</span></button>' +
           '</div>' +
@@ -427,7 +513,7 @@
             active.photos.map(function (p, i) {
               return (
                 '<button type="button" class="thumb-btn' + (i === expState.photoIdx ? ' active' : '') + '" data-exp-photo="' + i + '" aria-label="Select photo ' + (i + 1) + '">' +
-                  '<img src="' + safeAttrUrl(p.src) + '" alt="' + escapeHtml(pick(p.caption)) + '" loading="lazy" />' +
+                  '<img src="' + safeAttrUrl(p.src) + '" alt="' + escapeHtml(pick(p.caption)) + '" loading="lazy" decoding="async" />' +
                 '</button>'
               );
             }).join('') +
@@ -455,7 +541,10 @@
         '</div>' +
       '</div>';
 
-    if (typeof scheduleScrollParallaxUpdate === 'function') scheduleScrollParallaxUpdate();
+    if (activeView === 'experience' && typeof cacheParallaxMetrics === 'function') {
+      cacheParallaxMetrics();
+      scheduleScrollParallaxUpdate();
+    }
   }
 
   /* ------------------------------------------------------------------------
@@ -508,10 +597,11 @@
     bentoEl.innerHTML = filtered.map(function (p, idx) {
       const isAct = p.id === active.id;
       const cascadeCls = animateEnter ? ' cascade-card' : '';
+      const tone = prjTone(p.id, p.category);
       return (
-        '<button type="button" class="bento-prj-card black-showcase-card' + cascadeCls + (isAct ? ' active' : '') + '" style="--card-i:' + Math.min(idx, 6) + '" data-select-prj="' + p.id + '">' +
+        '<button type="button" class="bento-prj-card black-showcase-card interactive-card' + cascadeCls + (isAct ? ' active' : '') + '" data-tone="' + tone + '" style="--card-i:' + Math.min(idx, 6) + '" data-select-prj="' + p.id + '">' +
           '<div class="bento-prj-thumb parallax-frame" data-scroll-parallax="0.16">' +
-            '<img src="' + safeAttrUrl(p.photos[0].src) + '" alt="' + escapeHtml(p.title) + '" loading="lazy" />' +
+            '<img src="' + safeAttrUrl(p.photos[0].src) + '" alt="' + escapeHtml(p.title) + '" loading="lazy" decoding="async" />' +
             '<span class="bento-prj-badge">' + p.code + '</span>' +
             '<span class="bento-prj-count">' + p.photos.length + ' ' + escapeHtml(photosWord) + '</span>' +
           '</div>' +
@@ -519,22 +609,24 @@
             '<span class="bento-prj-cat">' + escapeHtml(pick(p.categoryLabel)) + '</span>' +
             '<h3 class="bento-prj-title">' + escapeHtml(p.title) + '</h3>' +
             '<div class="tag-list" style="margin-top:auto; padding-top:0.35rem;">' +
-              p.stack.slice(0, 3).map(function (s) { return '<span class="tag tag-dark">' + escapeHtml(s) + '</span>'; }).join('') +
+              p.stack.slice(0, 3).map(function (s) { return '<span class="tag tag-showcase">' + escapeHtml(s) + '</span>'; }).join('') +
             '</div>' +
           '</div>' +
         '</button>'
       );
     }).join('');
 
+    const activePrjTone = prjTone(active.id, active.category);
+
     detailEl.innerHTML =
-      '<div class="detail-sheet detail-sheet-wide' + (animateEnter ? ' detail-enter' : '') + '">' +
+      '<div class="detail-sheet detail-sheet-wide scroll-reveal' + (animateEnter ? ' detail-enter' : '') + '" data-tone="' + activePrjTone + '" style="--reveal-i:0">' +
         '<div class="media-showcase">' +
           '<div class="media-stage parallax-frame" data-scroll-parallax="0.14">' +
             (active.photos.length > 1
               ? '<button type="button" class="stage-arrow prev" data-prj-step="-1" aria-label="Previous photo">' + ICONS.prev + '</button>' +
                 '<button type="button" class="stage-arrow next" data-prj-step="1" aria-label="Next photo">' + ICONS.next + '</button>'
               : '') +
-            '<img id="prj-stage-img" src="' + safeAttrUrl(currentPhoto.src) + '" alt="' + escapeHtml(pick(currentPhoto.caption)) + '" data-open-prj-lb="true" />' +
+            '<img id="prj-stage-img" src="' + safeAttrUrl(currentPhoto.src) + '" alt="' + escapeHtml(pick(currentPhoto.caption)) + '" decoding="async" data-open-prj-lb="true" />' +
             '<span id="prj-stage-counter" class="stage-counter">' + (prjState.photoIdx + 1) + ' / ' + active.photos.length + '</span>' +
             '<button type="button" class="stage-expand-btn" data-open-prj-lb="true">' + ICONS.expand + '<span>' + escapeHtml(t('common.fullscreen')) + '</span></button>' +
           '</div>' +
@@ -543,7 +635,7 @@
             active.photos.map(function (p, i) {
               return (
                 '<button type="button" class="thumb-btn' + (i === prjState.photoIdx ? ' active' : '') + '" data-prj-photo="' + i + '" aria-label="Select photo ' + (i + 1) + '">' +
-                  '<img src="' + safeAttrUrl(p.src) + '" alt="' + escapeHtml(pick(p.caption)) + '" loading="lazy" />' +
+                  '<img src="' + safeAttrUrl(p.src) + '" alt="' + escapeHtml(pick(p.caption)) + '" loading="lazy" decoding="async" />' +
                 '</button>'
               );
             }).join('') +
@@ -578,8 +670,13 @@
         '</div>' +
       '</div>';
 
-    if (activeView === 'projects') refreshScrollReveals(detailEl);
-    if (typeof scheduleScrollParallaxUpdate === 'function') scheduleScrollParallaxUpdate();
+    if (activeView === 'projects') {
+      refreshScrollReveals(detailEl);
+      if (typeof cacheParallaxMetrics === 'function') {
+        cacheParallaxMetrics();
+        scheduleScrollParallaxUpdate();
+      }
+    }
   }
 
   /* ------------------------------------------------------------------------
@@ -610,17 +707,19 @@
       const isFeatured = certFilter === 'all' && idx === 0;
       const cascadeCls = animateCards ? ' cascade-card' : '';
 
+      const tone = certTone(c.category);
+
       return (
-        '<button type="button" class="cert-card interactive-card scroll-reveal' + cascadeCls + (isFeatured ? ' featured-cert' : '') + '" style="--card-i:' + Math.min(idx, 7) + '; --reveal-i:' + (idx % 4) + '" data-open-cert-idx="' + idx + '" aria-label="' + escapeHtml(hoverLabel + ': ' + title) + '">' +
+        '<button type="button" class="cert-card interactive-card scroll-reveal' + cascadeCls + (isFeatured ? ' featured-cert' : '') + '" data-tone="' + tone + '" style="--card-i:' + Math.min(idx, 7) + '; --reveal-i:' + (idx % 4) + '" data-open-cert-idx="' + idx + '" aria-label="' + escapeHtml(hoverLabel + ': ' + title) + '">' +
           '<div class="cert-frame">' +
-            '<img src="' + safeAttrUrl(c.image) + '" alt="' + escapeHtml(title) + '" loading="lazy" />' +
+            '<img src="' + safeAttrUrl(c.image) + '" alt="' + escapeHtml(title) + '" loading="lazy" decoding="async" />' +
             '<span class="cert-hover-pill">' + escapeHtml(hoverLabel) + '</span>' +
           '</div>' +
           '<div class="cert-body">' +
             '<div class="cert-meta-row">' +
               '<div class="tag-list">' +
                 (isFeatured ? '<span class="tag tag-accent">' + escapeHtml(featuredLabel) + '</span>' : '') +
-                '<span class="tag">' + escapeHtml(tag) + '</span>' +
+                '<span class="tag tag-accent">' + escapeHtml(tag) + '</span>' +
               '</div>' +
               '<span>' + escapeHtml(date) + '</span>' +
             '</div>' +
@@ -846,11 +945,11 @@
   }
 
   /* ------------------------------------------------------------------------
-     Interactive Architectural Kinetic Field (HTML5 Canvas, 60fps RAF)
-     - Organic continuous dot-matrix wave + thin monochrome signal contours
-     - Desktop cursor magnetic displacement & wave ripple with lerp damping
-     - Layer-switch directional phase impulse & subtle expanding wave ring
-     - DPR <= 2, ResizeObserver, visibilitychange auto-pause, reduced-motion safe
+     Zero-Idle-CPU Technical Workspace Blueprint Canvas (Chrome 60fps Optimized)
+     - Replaces continuous 80,000-arc/sec Canvas2D loop with on-demand static
+       high-precision coordinate crosshairs + 3 harmonic signal curves
+     - Redraws ONLY on resize, theme switch, or brief damped layer-switch pulse
+     - Scrolls purely on GPU compositor via CSS transform (--canvas-scroll-y)
      ------------------------------------------------------------------------ */
   const kineticState = {
     canvas: null,
@@ -859,40 +958,102 @@
     h: 0,
     dpr: 1,
     rafId: null,
-    running: false,
-    phase: 0,
-    phaseImpulseVel: 0,
-    ringRadius: 0,
-    ringAlpha: 0,
-    ringX: 0,
-    ringY: 0,
-    targetX: -9999,
-    targetY: -9999,
-    curX: -9999,
-    curY: -9999,
-    pointerActive: false,
-    pointerStrength: 0,
-    lastTs: 0,
-    isDark: false,
-    scrollOffset: 0,
-    scrollVel: 0
+    pulseProgress: 0,
+    pulseDir: 1,
+    pulseStartTs: 0,
+    isDark: false
   };
 
-  function syncKineticTheme() {
-    kineticState.isDark = document.documentElement.classList.contains('dark');
-    if (prefersReducedMotion && kineticState.ctx) {
-      drawKineticFrame(0);
+  function drawTechnicalBlueprint(pulseT) {
+    const ctx = kineticState.ctx;
+    const w = kineticState.w;
+    const h = kineticState.h;
+    if (!ctx || !w || !h) return;
+
+    ctx.clearRect(0, 0, w, h);
+
+    const dark = kineticState.isDark;
+    const isMobile = w < 768;
+    const cobaltRgb = dark ? '79, 143, 247' : '29, 78, 216';
+    const tealRgb = dark ? '45, 212, 191' : '15, 118, 110';
+    const amberRgb = dark ? '251, 191, 36' : '180, 83, 9';
+
+    // 1. Three lightweight harmonic signal contours (Cobalt, Teal, Amber)
+    const palettes = [cobaltRgb, tealRgb, amberRgb];
+    const lineCount = isMobile ? 2 : 3;
+    const stepX = isMobile ? 36 : 24;
+    const phaseShift = pulseT * kineticState.pulseDir * 1.35;
+    ctx.lineWidth = 1;
+
+    for (let li = 0; li < lineCount; li++) {
+      const baseY = h * (0.22 + li * 0.28);
+      const amp = (isMobile ? 14 : 22) + li * 5;
+      const freq = 0.0022 + li * 0.0006;
+      ctx.beginPath();
+      for (let x = 0; x <= w + stepX; x += stepX) {
+        const y = baseY
+          + Math.sin(x * freq + li * 1.6 + phaseShift) * amp
+          + Math.cos(x * freq * 0.55 - li + phaseShift * 0.6) * (amp * 0.42);
+        if (x === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.strokeStyle = 'rgba(' + palettes[li] + ', ' + (dark ? 0.13 : 0.095) + ')';
+      ctx.stroke();
+    }
+
+    // 2. Sparse architectural registration crosshairs at major 192px intersections
+    if (!isMobile) {
+      const gridStep = 192;
+      const arm = 4;
+      ctx.strokeStyle = 'rgba(' + cobaltRgb + ', ' + (dark ? 0.2 : 0.14) + ')';
+      ctx.beginPath();
+      for (let gx = gridStep * 0.5; gx < w; gx += gridStep) {
+        for (let gy = gridStep * 0.5; gy < h; gy += gridStep) {
+          ctx.moveTo(gx - arm, gy);
+          ctx.lineTo(gx + arm, gy);
+          ctx.moveTo(gx, gy - arm);
+          ctx.lineTo(gx, gy + arm);
+        }
+      }
+      ctx.stroke();
+    }
+
+    // 3. Optional brief layer-switch expanding pulse ring (auto-stops in 420ms -> 0% idle CPU)
+    if (pulseT > 0.001 && pulseT < 1) {
+      const ease = 1 - Math.pow(1 - pulseT, 3);
+      const r = 40 + ease * Math.max(w, h) * 0.52;
+      const alpha = (1 - ease) * (dark ? 0.22 : 0.16);
+      ctx.beginPath();
+      ctx.arc(w * 0.5, h * 0.42, r, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(' + cobaltRgb + ', ' + alpha.toFixed(3) + ')';
+      ctx.lineWidth = 1.25;
+      ctx.stroke();
     }
   }
 
+  function syncKineticTheme() {
+    kineticState.isDark = document.documentElement.classList.contains('dark');
+    drawTechnicalBlueprint(0);
+  }
+
   function triggerKineticImpulse(direction) {
-    if (prefersReducedMotion || !kineticState.canvas) return;
-    const dir = direction >= 0 ? 1 : -1;
-    kineticState.phaseImpulseVel = dir * 3.8;
-    kineticState.ringX = kineticState.w * 0.5;
-    kineticState.ringY = kineticState.h * 0.42;
-    kineticState.ringRadius = 24;
-    kineticState.ringAlpha = 0.22;
+    if (prefersReducedMotion || !kineticState.ctx) return;
+    if (kineticState.rafId) cancelAnimationFrame(kineticState.rafId);
+    kineticState.pulseDir = direction >= 0 ? 1 : -1;
+    kineticState.pulseStartTs = 0;
+
+    const stepPulse = function (ts) {
+      if (!kineticState.pulseStartTs) kineticState.pulseStartTs = ts;
+      const p = Math.min((ts - kineticState.pulseStartTs) / 420, 1);
+      drawTechnicalBlueprint(p);
+      if (p < 1) {
+        kineticState.rafId = requestAnimationFrame(stepPulse);
+      } else {
+        kineticState.rafId = null;
+        drawTechnicalBlueprint(0);
+      }
+    };
+    kineticState.rafId = requestAnimationFrame(stepPulse);
   }
 
   function resizeKineticCanvas() {
@@ -900,7 +1061,7 @@
     if (!canvas) return;
     const w = window.innerWidth;
     const h = window.innerHeight;
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
     kineticState.w = w;
     kineticState.h = h;
     kineticState.dpr = dpr;
@@ -910,174 +1071,7 @@
     canvas.style.height = h + 'px';
     if (kineticState.ctx) {
       kineticState.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      if (prefersReducedMotion) drawKineticFrame(0);
-    }
-  }
-
-  function drawKineticFrame(dt) {
-    const ctx = kineticState.ctx;
-    const w = kineticState.w;
-    const h = kineticState.h;
-    if (!ctx || !w || !h) return;
-
-    // Advance organic ambient phase + smooth damped layer-switch & scroll impulse
-    kineticState.phase += dt * 0.72 + kineticState.phaseImpulseVel * dt + kineticState.scrollVel * dt * 0.14;
-    kineticState.phaseImpulseVel *= Math.pow(0.08, dt);
-    if (Math.abs(kineticState.phaseImpulseVel) < 0.002) kineticState.phaseImpulseVel = 0;
-    kineticState.scrollVel *= Math.pow(0.04, dt);
-    if (Math.abs(kineticState.scrollVel) < 0.002) kineticState.scrollVel = 0;
-
-    if (kineticState.ringAlpha > 0.004) {
-      kineticState.ringRadius += dt * Math.max(w, h) * 0.85;
-      kineticState.ringAlpha *= Math.pow(0.14, dt);
-    } else {
-      kineticState.ringAlpha = 0;
-    }
-
-    // Lerp desktop cursor coordinates & active presence smoothly
-    const targetStrength = kineticState.pointerActive ? 1 : 0;
-    const lerpFactor = 1 - Math.pow(0.0012, dt);
-    kineticState.pointerStrength += (targetStrength - kineticState.pointerStrength) * lerpFactor;
-    if (kineticState.pointerActive) {
-      if (kineticState.curX < -1000) {
-        kineticState.curX = kineticState.targetX;
-        kineticState.curY = kineticState.targetY;
-      } else {
-        kineticState.curX += (kineticState.targetX - kineticState.curX) * lerpFactor;
-        kineticState.curY += (kineticState.targetY - kineticState.curY) * lerpFactor;
-      }
-    }
-
-    ctx.clearRect(0, 0, w, h);
-
-    const t = kineticState.phase;
-    const dark = kineticState.isDark;
-    const rgb = dark ? '235, 235, 235' : '34, 34, 34';
-    const isMobile = w < 768 || !hasFinePointer;
-    const spacing = isMobile ? 46 : 40;
-    const cols = Math.ceil(w / spacing) + 1;
-    const rows = Math.ceil(h / spacing) + 1;
-    const offsetX = ((w - (cols - 1) * spacing) * 0.5);
-    const offsetY = ((h - (rows - 1) * spacing) * 0.5);
-    const influenceRadius = isMobile ? 0 : 175;
-    const influenceSq = influenceRadius * influenceRadius;
-    const pStr = kineticState.pointerStrength;
-    const px = kineticState.curX;
-    const py = kineticState.curY;
-    const ringR = kineticState.ringRadius;
-    const ringA = kineticState.ringAlpha;
-
-    const scrollParallaxY = isMobile ? 0 : (kineticState.scrollOffset * 0.09);
-
-    // 1. Subtle Flowing Architectural Contour / Signal Lines (3 harmonic bands)
-    const lineCount = isMobile ? 2 : 3;
-    const stepX = isMobile ? 32 : 24;
-    ctx.lineWidth = 1;
-    for (let li = 0; li < lineCount; li++) {
-      const baseY = h * (0.24 + li * 0.27) - (scrollParallaxY * (0.35 + li * 0.18) % (h * 0.45));
-      const amp = (isMobile ? 16 : 24) + li * 6;
-      const freq = 0.0024 + li * 0.0007;
-      const speed = (li % 2 === 0 ? 1 : -0.82);
-      ctx.beginPath();
-      for (let x = -stepX; x <= w + stepX; x += stepX) {
-        let y = baseY
-          + Math.sin(x * freq + t * speed + li * 1.4) * amp
-          + Math.cos(x * freq * 0.52 - t * 0.55 + li) * (amp * 0.48);
-
-        if (!isMobile && pStr > 0.01) {
-          const dx = x - px;
-          const dy = y - py;
-          const distSq = dx * dx + dy * dy;
-          if (distSq < influenceSq * 1.65) {
-            const dist = Math.sqrt(distSq);
-            const falloff = Math.exp(-(dist * dist) / (influenceSq * 0.58));
-            const bend = Math.sin(dist * 0.032 - t * 2.2) * 10 + (dy > 0 ? 12 : -12);
-            y += bend * falloff * pStr;
-          }
-        }
-
-        if (x === -stepX) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      }
-      ctx.strokeStyle = 'rgba(' + rgb + ', ' + (dark ? 0.075 : 0.068) + ')';
-      ctx.stroke();
-    }
-
-    // 2. Precision Kinetic Dot-Matrix Grid (Ambient Wave + Cursor Magnetic Ripple + Layer Impulse)
-    for (let r = 0; r < rows; r++) {
-      const gy = offsetY + r * spacing;
-      for (let c = 0; c < cols; c++) {
-        const gx = offsetX + c * spacing;
-        const waveA = Math.sin(gx * 0.011 + gy * 0.007 + t * 0.95);
-        const waveB = Math.cos(gx * 0.006 - gy * 0.012 + t * 0.62);
-
-        let dx = waveA * 2.6;
-        let dy = waveB * 2.6;
-        let alpha = (dark ? 0.11 : 0.115) + (waveA + waveB) * 0.028;
-        let radius = 1.1 + (waveA * 0.22);
-
-        // Layer-switch physical wave ring ripple
-        if (ringA > 0.005) {
-          const rx = gx - kineticState.ringX;
-          const ry = gy - kineticState.ringY;
-          const rDist = Math.sqrt(rx * rx + ry * ry);
-          const band = Math.abs(rDist - ringR);
-          if (band < 85 && rDist > 1) {
-            const k = (1 - band / 85) * ringA;
-            dx += (rx / rDist) * k * 28;
-            dy += (ry / rDist) * k * 28;
-            alpha += k * 0.36;
-            radius += k * 1.6;
-          }
-        }
-
-        // Desktop cursor elastic magnetic displacement
-        if (!isMobile && pStr > 0.01) {
-          const mdx = gx - px;
-          const mdy = gy - py;
-          const dSq = mdx * mdx + mdy * mdy;
-          if (dSq < influenceSq && dSq > 0.01) {
-            const dist = Math.sqrt(dSq);
-            const norm = 1 - dist / influenceRadius;
-            const ease = norm * norm * pStr;
-            const ripple = Math.sin(dist * 0.055 - t * 3.1) * 3.2;
-            const push = ease * 14 + ripple * ease;
-            dx += (mdx / dist) * push;
-            dy += (mdy / dist) * push;
-            alpha += ease * 0.22;
-            radius += ease * 1.05;
-          }
-        }
-
-        ctx.fillStyle = 'rgba(' + rgb + ', ' + Math.max(0.03, Math.min(0.46, alpha)).toFixed(3) + ')';
-        ctx.beginPath();
-        ctx.arc(gx + dx, gy + dy, Math.max(0.75, radius), 0, Math.PI * 2);
-        ctx.fill();
-      }
-    }
-  }
-
-  function kineticLoop(ts) {
-    if (!kineticState.running) return;
-    if (!kineticState.lastTs) kineticState.lastTs = ts;
-    const dt = Math.min((ts - kineticState.lastTs) / 1000, 0.05);
-    kineticState.lastTs = ts;
-    drawKineticFrame(dt);
-    kineticState.rafId = requestAnimationFrame(kineticLoop);
-  }
-
-  function startKineticLoop() {
-    if (prefersReducedMotion || kineticState.running || document.hidden) return;
-    kineticState.running = true;
-    kineticState.lastTs = 0;
-    kineticState.rafId = requestAnimationFrame(kineticLoop);
-  }
-
-  function stopKineticLoop() {
-    kineticState.running = false;
-    if (kineticState.rafId) {
-      cancelAnimationFrame(kineticState.rafId);
-      kineticState.rafId = null;
+      drawTechnicalBlueprint(0);
     }
   }
 
@@ -1090,44 +1084,14 @@
     resizeKineticCanvas();
 
     let resizeTimer = null;
-    const scheduleResize = function () {
+    window.addEventListener('resize', function () {
       if (resizeTimer) clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(resizeKineticCanvas, 80);
-    };
-
-    if (typeof ResizeObserver === 'function') {
-      const ro = new ResizeObserver(scheduleResize);
-      ro.observe(document.documentElement);
-    } else {
-      window.addEventListener('resize', scheduleResize, { passive: true });
-    }
-
-    if (hasFinePointer && !prefersReducedMotion) {
-      document.addEventListener('pointermove', function (e) {
-        kineticState.targetX = e.clientX;
-        kineticState.targetY = e.clientY;
-        kineticState.pointerActive = true;
-      }, { passive: true });
-
-      document.addEventListener('pointerleave', function () {
-        kineticState.pointerActive = false;
-      }, { passive: true });
-    }
-
-    document.addEventListener('visibilitychange', function () {
-      if (document.hidden) stopKineticLoop();
-      else startKineticLoop();
-    });
-
-    if (prefersReducedMotion) {
-      drawKineticFrame(0);
-    } else {
-      startKineticLoop();
-    }
+      resizeTimer = setTimeout(resizeKineticCanvas, 100);
+    }, { passive: true });
   }
 
   /* ------------------------------------------------------------------------
-     Below-the-Fold Scroll Depth Reveal (Zero Stuck-Hidden Guarantee)
+     Observer-Only Scroll Choreography (Zero Per-Scroll Layout Reads)
      ------------------------------------------------------------------------ */
   let scrollObserver = null;
 
@@ -1138,26 +1102,13 @@
     if (scrollObserver) scrollObserver.unobserve(el);
   }
 
-  function checkPendingScrollReveals() {
-    const activeLayer = document.querySelector('.view-layer.active');
-    if (!activeLayer) return;
-    const vh = window.innerHeight || 900;
-    activeLayer.querySelectorAll('.scroll-reveal.reveal-pending').forEach(function (el) {
-      const rect = el.getBoundingClientRect();
-      if (rect.top < vh * 1.04) revealElementNow(el);
-    });
-  }
-
   function initScrollReveal() {
     if (prefersReducedMotion || typeof IntersectionObserver !== 'function') return;
     scrollObserver = new IntersectionObserver(function (entries) {
       entries.forEach(function (entry) {
         if (entry.isIntersecting) revealElementNow(entry.target);
       });
-    }, { threshold: 0.04, rootMargin: '0px 0px 48px 0px' });
-
-    window.addEventListener('scroll', checkPendingScrollReveals, { passive: true });
-    window.addEventListener('resize', checkPendingScrollReveals, { passive: true });
+    }, { threshold: 0.05, rootMargin: '0px 0px -20px 0px' });
   }
 
   function refreshScrollReveals(container) {
@@ -1174,8 +1125,7 @@
     nodes.forEach(function (el) {
       el.classList.remove('reveal-pending', 'is-revealed');
       const rect = el.getBoundingClientRect();
-      // Only gate elements strictly below the current viewport fold
-      if (rect.top > vh * 0.98) {
+      if (rect.top > vh * 0.94) {
         el.classList.add('reveal-pending');
         scrollObserver.observe(el);
       } else {
@@ -1185,99 +1135,113 @@
   }
 
   /* ------------------------------------------------------------------------
-     Multi-Layer 60fps Scroll Parallax & Architectural Progress Engine
-     - GPU-only custom properties (--bg-scroll-y, --grid-scroll-y, --sy, --media-py)
-     - Zero text parallax, zero scroll-jacking, zero layout shift (CLS = 0)
-     - Automatically simplified/disabled on mobile (< 768px) & prefers-reduced-motion
+     Cached Zero-Layout-Thrash 60fps Scroll Parallax & Unified Pointer Engine
      ------------------------------------------------------------------------ */
   let scrollParallaxRaf = false;
-  let lastKnownScrollY = 0;
+  let cachedDocScrollMax = 0;
+  let cachedMosaicItems = [];
+  let cachedMediaFrames = [];
+
+  function cacheParallaxMetrics() {
+    const scrollY = window.scrollY || window.pageYOffset || 0;
+    cachedDocScrollMax = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+    cachedMosaicItems = [];
+    cachedMediaFrames = [];
+
+    const activeLayer = document.querySelector('.view-layer.active');
+    if (!activeLayer) return;
+
+    if (activeLayer.id === 'view-home') {
+      activeLayer.querySelectorAll('.mosaic-tile[data-parallax-depth]').forEach(function (tile) {
+        const inner = tile.querySelector('.mosaic-parallax');
+        if (inner) {
+          cachedMosaicItems.push({
+            inner: inner,
+            depth: parseFloat(tile.getAttribute('data-parallax-depth')) || 0
+          });
+        }
+      });
+    }
+
+    activeLayer.querySelectorAll('.parallax-frame[data-scroll-parallax]').forEach(function (frame) {
+      const img = frame.querySelector('img');
+      if (!img) return;
+      const rect = frame.getBoundingClientRect();
+      cachedMediaFrames.push({
+        img: img,
+        docTop: rect.top + scrollY,
+        height: rect.height || 240,
+        factor: parseFloat(frame.getAttribute('data-scroll-parallax')) || 0.14
+      });
+    });
+  }
 
   function resetAllScrollParallax() {
     const ambientBg = document.getElementById('ambient-canvas-bg');
     const depthGrid = document.getElementById('ambient-depth-grid');
+    const bgCanvas = document.getElementById('kinetic-bg-canvas');
     if (ambientBg) ambientBg.style.setProperty('--bg-scroll-y', '0px');
     if (depthGrid) depthGrid.style.setProperty('--grid-scroll-y', '0px');
-    document.querySelectorAll('.mosaic-tile .mosaic-parallax').forEach(function (inner) {
-      inner.style.setProperty('--sy', '0px');
-    });
-    document.querySelectorAll('.parallax-frame img').forEach(function (img) {
-      img.style.setProperty('--media-py', '0px');
-    });
+    if (bgCanvas) bgCanvas.style.setProperty('--canvas-scroll-y', '0px');
+    cachedMosaicItems.forEach(function (m) { m.inner.style.setProperty('--sy', '0px'); });
+    cachedMediaFrames.forEach(function (f) { f.img.style.setProperty('--media-py', '0px'); });
   }
 
   function applyScrollParallaxFrame() {
     scrollParallaxRaf = false;
 
     const scrollY = window.scrollY || window.pageYOffset || 0;
-    const deltaY = scrollY - lastKnownScrollY;
-    lastKnownScrollY = scrollY;
-
     const header = document.querySelector('.site-header');
     if (header) header.classList.toggle('is-scrolled', scrollY > 12);
 
     const progressBar = document.getElementById('scroll-progress-bar');
     if (progressBar) {
-      const docH = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
-      const ratio = docH > 24 ? Math.max(0, Math.min(1, scrollY / docH)) : 0;
+      const ratio = cachedDocScrollMax > 24 ? Math.max(0, Math.min(1, scrollY / cachedDocScrollMax)) : 0;
       progressBar.style.transform = 'scaleX(' + ratio.toFixed(4) + ')';
     }
 
     const canParallax = !prefersReducedMotion && hasFinePointer && window.innerWidth >= 768;
     if (!canParallax) {
       resetAllScrollParallax();
-      kineticState.scrollOffset = 0;
-      kineticState.scrollVel = 0;
       return;
     }
 
-    // Layer 1: Multi-depth ambient background lighting & architectural grid drift
+    // Multi-layer workspace depth parallax (3 distinct GPU speeds, 0 layout reads)
     const ambientBg = document.getElementById('ambient-canvas-bg');
     if (ambientBg) {
-      const bgShift = Math.max(-90, Math.min(90, -scrollY * 0.065));
-      ambientBg.style.setProperty('--bg-scroll-y', bgShift.toFixed(2) + 'px');
+      ambientBg.style.setProperty('--bg-scroll-y', Math.max(-96, Math.min(96, -scrollY * 0.06)).toFixed(1) + 'px');
     }
 
     const depthGrid = document.getElementById('ambient-depth-grid');
     if (depthGrid) {
-      const gridShift = -((scrollY * 0.14) % 96);
-      depthGrid.style.setProperty('--grid-scroll-y', gridShift.toFixed(2) + 'px');
+      depthGrid.style.setProperty('--grid-scroll-y', (-((scrollY * 0.18) % 96)).toFixed(1) + 'px');
     }
 
-    // Feed damped scroll momentum into the kinetic canvas contour field
-    kineticState.scrollOffset = scrollY;
-    kineticState.scrollVel = Math.max(-4.5, Math.min(4.5, kineticState.scrollVel + deltaY * 0.018));
-
-    const activeLayer = document.querySelector('.view-layer.active');
-    if (!activeLayer) return;
+    const bgCanvas = document.getElementById('kinetic-bg-canvas');
+    if (bgCanvas) {
+      bgCanvas.style.setProperty('--canvas-scroll-y', Math.max(-72, Math.min(72, -scrollY * 0.095)).toFixed(1) + 'px');
+    }
 
     const vh = window.innerHeight || 900;
 
-    // Layer 2: Hero overlapping gallery mosaic multi-depth vertical scroll separation
-    if (activeLayer.id === 'view-home' && window.innerWidth >= 1024) {
-      const heroProgress = Math.min(scrollY, 680);
-      activeLayer.querySelectorAll('.mosaic-tile[data-parallax-depth]').forEach(function (tile) {
-        const depth = parseFloat(tile.getAttribute('data-parallax-depth')) || 0;
-        const inner = tile.querySelector('.mosaic-parallax');
-        if (inner) {
-          const sy = Math.max(-34, Math.min(34, -heroProgress * 0.055 * depth));
-          inner.style.setProperty('--sy', sy.toFixed(2) + 'px');
-        }
-      });
+    if (cachedMosaicItems.length && window.innerWidth >= 1024) {
+      const heroProgress = Math.min(scrollY, 720);
+      for (let i = 0; i < cachedMosaicItems.length; i++) {
+        const m = cachedMosaicItems[i];
+        const sy = Math.max(-38, Math.min(38, -heroProgress * 0.062 * m.depth));
+        m.inner.style.setProperty('--sy', sy.toFixed(1) + 'px');
+      }
     }
 
-    // Layer 3: Clipped visual media frames inner-image parallax across every active view
-    activeLayer.querySelectorAll('.parallax-frame[data-scroll-parallax]').forEach(function (frame) {
-      const rect = frame.getBoundingClientRect();
-      if (rect.bottom < -60 || rect.top > vh + 60) return;
-      const img = frame.querySelector('img');
-      if (!img) return;
-      const factor = parseFloat(frame.getAttribute('data-scroll-parallax')) || 0.14;
-      const center = rect.top + rect.height * 0.5;
+    for (let i = 0; i < cachedMediaFrames.length; i++) {
+      const f = cachedMediaFrames[i];
+      const viewTop = f.docTop - scrollY;
+      if (viewTop + f.height < -80 || viewTop > vh + 80) continue;
+      const center = viewTop + f.height * 0.5;
       const norm = Math.max(-1, Math.min(1, (center - vh * 0.5) / (vh * 0.65)));
-      const shiftY = Math.max(-12, Math.min(12, norm * 24 * factor));
-      img.style.setProperty('--media-py', shiftY.toFixed(2) + 'px');
-    });
+      const shiftY = Math.max(-13, Math.min(13, norm * 26 * f.factor));
+      f.img.style.setProperty('--media-py', shiftY.toFixed(1) + 'px');
+    }
   }
 
   function scheduleScrollParallaxUpdate() {
@@ -1287,62 +1251,81 @@
   }
 
   function initScrollParallax() {
-    lastKnownScrollY = window.scrollY || window.pageYOffset || 0;
+    cacheParallaxMetrics();
     window.addEventListener('scroll', scheduleScrollParallaxUpdate, { passive: true });
-    window.addEventListener('resize', scheduleScrollParallaxUpdate, { passive: true });
+    let resizeDebounce = null;
+    window.addEventListener('resize', function () {
+      if (resizeDebounce) clearTimeout(resizeDebounce);
+      resizeDebounce = setTimeout(function () {
+        cacheParallaxMetrics();
+        scheduleScrollParallaxUpdate();
+      }, 90);
+    }, { passive: true });
     scheduleScrollParallaxUpdate();
   }
 
   /* ------------------------------------------------------------------------
-     Gallery Wall in Motion: Multi-Depth Mosaic Desktop Pointer Parallax
+     Unified Desktop Pointer Loop (Mosaic Depth + Lightweight Card Spotlight)
+     - Runs ONLY on pointermove (0% idle CPU), disabled on touch/mobile
      ------------------------------------------------------------------------ */
   function initDesktopMotion() {
     if (prefersReducedMotion || !hasFinePointer) return;
 
     const homeLayer = document.getElementById('view-home');
-    const mosaicTiles = Array.prototype.slice.call(document.querySelectorAll('.mosaic-tile[data-parallax-depth]'));
     let rafPending = false;
-    let lastEvent = null;
+    let pointerX = 0;
+    let pointerY = 0;
+    let hoveredCard = null;
+    let hoveredRect = null;
 
     function resetMosaicParallax() {
-      mosaicTiles.forEach(function (tile) {
-        const inner = tile.querySelector('.mosaic-parallax');
-        if (inner) {
-          inner.style.setProperty('--px', '0px');
-          inner.style.setProperty('--py', '0px');
-        }
+      cachedMosaicItems.forEach(function (m) {
+        m.inner.style.setProperty('--px', '0px');
+        m.inner.style.setProperty('--py', '0px');
       });
     }
 
+    document.addEventListener('pointerover', function (e) {
+      const card = e.target && e.target.closest ? e.target.closest('.interactive-card') : null;
+      if (card !== hoveredCard) {
+        hoveredCard = card;
+        hoveredRect = card ? card.getBoundingClientRect() : null;
+      }
+    }, { passive: true });
+
+    window.addEventListener('scroll', function () {
+      if (hoveredCard) hoveredRect = null;
+    }, { passive: true });
+
     document.addEventListener('pointermove', function (e) {
-      lastEvent = e;
+      pointerX = e.clientX;
+      pointerY = e.clientY;
       if (rafPending) return;
       rafPending = true;
       requestAnimationFrame(function () {
         rafPending = false;
-        if (!lastEvent) return;
 
-        const isDesktop = window.innerWidth >= 1024;
-        const normX = lastEvent.clientX / window.innerWidth - 0.5;
-        const normY = lastEvent.clientY / window.innerHeight - 0.5;
+        if (window.innerWidth >= 1024 && homeLayer && homeLayer.classList.contains('active') && cachedMosaicItems.length) {
+          const normX = pointerX / window.innerWidth - 0.5;
+          const normY = pointerY / window.innerHeight - 0.5;
+          for (let i = 0; i < cachedMosaicItems.length; i++) {
+            const m = cachedMosaicItems[i];
+            m.inner.style.setProperty('--px', (normX * 18 * m.depth).toFixed(1) + 'px');
+            m.inner.style.setProperty('--py', (normY * 14 * m.depth).toFixed(1) + 'px');
+          }
+        }
 
-        if (isDesktop && homeLayer && homeLayer.classList.contains('active') && mosaicTiles.length) {
-          const maxShiftX = 18;
-          const maxShiftY = 14;
-          mosaicTiles.forEach(function (tile) {
-            const depth = parseFloat(tile.getAttribute('data-parallax-depth')) || 0;
-            const inner = tile.querySelector('.mosaic-parallax');
-            if (inner) {
-              inner.style.setProperty('--px', (normX * maxShiftX * depth).toFixed(2) + 'px');
-              inner.style.setProperty('--py', (normY * maxShiftY * depth).toFixed(2) + 'px');
-            }
-          });
+        if (hoveredCard) {
+          if (!hoveredRect) hoveredRect = hoveredCard.getBoundingClientRect();
+          hoveredCard.style.setProperty('--mx', (pointerX - hoveredRect.left).toFixed(0) + 'px');
+          hoveredCard.style.setProperty('--my', (pointerY - hoveredRect.top).toFixed(0) + 'px');
         }
       });
     }, { passive: true });
 
     document.addEventListener('pointerleave', resetMosaicParallax, { passive: true });
     window.addEventListener('resize', function () {
+      hoveredRect = null;
       if (window.innerWidth < 1024) resetMosaicParallax();
     }, { passive: true });
   }
@@ -1359,19 +1342,32 @@
     initDesktopMotion();
 
     navigateTo(resolveViewFromHash(window.location.hash), false);
+    requestAnimationFrame(function () {
+      updateSwitchGliders(true);
+      updateActiveFilterGlider(true);
+    });
 
     if (document.fonts && document.fonts.ready) {
-      document.fonts.ready.then(function () { updateNavSlider(true); });
+      document.fonts.ready.then(function () {
+        updateNavSlider(true);
+        updateSwitchGliders(true);
+        updateActiveFilterGlider(true);
+        cacheParallaxMetrics();
+      });
     }
     window.addEventListener('resize', function () {
-      requestAnimationFrame(function () { updateNavSlider(true); });
+      requestAnimationFrame(function () {
+        updateNavSlider(true);
+        updateSwitchGliders(true);
+        updateActiveFilterGlider(true);
+      });
     }, { passive: true });
 
     window.addEventListener('hashchange', function () {
       navigateTo(resolveViewFromHash(window.location.hash), false);
     });
 
-    // Mobile drawer toggle
+      // Mobile drawer toggle
     const mobileBtn = document.getElementById('mobile-menu-btn');
     const mobileDrawer = document.getElementById('mobile-drawer');
     if (mobileBtn && mobileDrawer) {
@@ -1379,6 +1375,9 @@
         e.stopPropagation();
         const open = mobileDrawer.classList.toggle('open');
         mobileBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+        if (open) {
+          requestAnimationFrame(function () { updateSwitchGliders(true); });
+        }
       });
     }
 
@@ -1413,6 +1412,8 @@
         document.querySelectorAll('[data-exp-filter]').forEach(function (b) {
           b.classList.toggle('active', b === expFilterBtn);
         });
+        updateFilterGliderIn(expFilterBtn.closest('.filter-bar'), false);
+        hydratedViews.experience = true;
         renderExperienceView(true);
         return;
       }
@@ -1425,6 +1426,8 @@
         document.querySelectorAll('[data-prj-filter]').forEach(function (b) {
           b.classList.toggle('active', b === prjFilterBtn);
         });
+        updateFilterGliderIn(prjFilterBtn.closest('.filter-bar'), false);
+        hydratedViews.projects = true;
         renderProjectsView(true);
         return;
       }
@@ -1436,6 +1439,8 @@
         document.querySelectorAll('[data-cert-filter]').forEach(function (b) {
           b.classList.toggle('active', b === certFilterBtn);
         });
+        updateFilterGliderIn(certFilterBtn.closest('.filter-bar'), false);
+        hydratedViews.certificates = true;
         renderCertificatesView(true);
         return;
       }
@@ -1453,6 +1458,7 @@
           document.querySelectorAll('[data-exp-filter]').forEach(function (b) {
             b.classList.toggle('active', b.getAttribute('data-exp-filter') === 'all');
           });
+          hydratedViews.experience = true;
           renderExperienceView(false);
         } else if (view === 'projects' && jumpId) {
           prjState.filter = 'all';
@@ -1461,6 +1467,7 @@
           document.querySelectorAll('[data-prj-filter]').forEach(function (b) {
             b.classList.toggle('active', b.getAttribute('data-prj-filter') === 'all');
           });
+          hydratedViews.projects = true;
           renderProjectsView(false);
         }
         navigateTo(view, true);

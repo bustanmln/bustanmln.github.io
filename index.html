@@ -79,6 +79,7 @@
       <div class="header-actions">
         <!-- Bilingual Language Switcher (ID | EN) -->
         <div class="lang-switch" role="radiogroup" aria-label="Language switcher">
+          <span class="pill-glider" aria-hidden="true"></span>
           <button type="button" class="lang-btn" role="radio" data-lang-opt="id" aria-checked="false" aria-label="Bahasa Indonesia">ID</button>
           <span class="lang-sep" aria-hidden="true">|</span>
           <button type="button" class="lang-btn" role="radio" data-lang-opt="en" aria-checked="true" aria-label="English">EN</button>
@@ -86,6 +87,7 @@
 
         <!-- Theme Switcher -->
         <div class="theme-switch" role="radiogroup" aria-label="Theme preference">
+          <span class="pill-glider" aria-hidden="true"></span>
           <button type="button" class="theme-btn" role="radio" data-theme-opt="light" aria-checked="true" aria-label="Light mode" title="Light mode">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <circle cx="12" cy="12" r="5"></circle>
@@ -146,6 +148,7 @@
       <div class="mobile-control-group">
         <span class="mono" style="font-size:11px; color:var(--ink-muted);" data-i18n="mobile.lang">LANG</span>
         <div class="lang-switch" role="radiogroup" aria-label="Mobile language switcher">
+          <span class="pill-glider" aria-hidden="true"></span>
           <button type="button" class="lang-btn" role="radio" data-lang-opt="id" aria-checked="false" aria-label="Bahasa Indonesia">ID</button>
           <span class="lang-sep" aria-hidden="true">|</span>
           <button type="button" class="lang-btn" role="radio" data-lang-opt="en" aria-checked="true" aria-label="English">EN</button>
@@ -155,6 +158,7 @@
       <div class="mobile-control-group">
         <span class="mono" style="font-size:11px; color:var(--ink-muted);" data-i18n="mobile.theme">THEME</span>
         <div class="theme-switch" style="display:inline-flex;" role="radiogroup" aria-label="Mobile theme preference">
+          <span class="pill-glider" aria-hidden="true"></span>
           <button type="button" class="theme-btn" role="radio" data-theme-opt="light" aria-checked="true" aria-label="Light mode">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line></svg>
           </button>
@@ -179,53 +183,53 @@
       <section id="view-home" class="view-layer active" aria-label="Home Overview">
         <!-- Asymmetric Gallery Wall Hero on Seamless Studio Canvas (#eeeeee) -->
         <div class="gallery-hero">
-          <div class="hero-statement-block stagger-item" style="--stagger-i:0">
+          <div class="hero-statement-block">
             <h1 class="hero-headline">
-              <span data-i18n="home.headline.pre">Industrial Automation, </span><span class="headline-subdued" data-i18n="home.headline.accent">Embedded IoT</span><span data-i18n="home.headline.post"> &amp; Applied AI.</span>
+              <span class="hero-mask"><span class="hero-mask-inner" style="--mask-i:0" data-i18n="home.headline.pre">Industrial Automation, </span></span><span class="hero-mask"><span class="hero-mask-inner headline-subdued" style="--mask-i:1" data-i18n="home.headline.accent">Embedded IoT</span></span><span class="hero-mask"><span class="hero-mask-inner" style="--mask-i:2" data-i18n="home.headline.post"> &amp; Applied AI.</span></span>
             </h1>
           </div>
 
           <!-- Center-Right Overlapping Portfolio Mosaic (Raw Vivid Work, 4px/8px Radii, Depth Parallax) -->
           <div id="hero-mosaic" class="hero-mosaic" aria-label="Featured Engineering Works Collage">
-            <button type="button" class="mosaic-tile tile-a radius-lg" data-parallax-depth="0.55" data-jump-view="projects" data-jump-id="prj-sipesat" style="--tile-i:0" aria-label="SIPESAT Waste Sorting System">
+            <button type="button" class="mosaic-tile tile-a radius-lg" data-tone="teal" data-parallax-depth="0.55" data-jump-view="projects" data-jump-id="prj-sipesat" style="--tile-i:0" aria-label="SIPESAT Waste Sorting System">
               <span class="mosaic-parallax">
-                <img src="images/projects/SIPESAT%20%E2%80%93%20Sistem%20Pemilah%20Sampah%20Terpadu/IMG_20261120_103621.jpg" alt="SIPESAT Integrated Waste Sorting System" />
+                <img src="images/projects/SIPESAT%20%E2%80%93%20Sistem%20Pemilah%20Sampah%20Terpadu/IMG_20261120_103621.jpg" alt="SIPESAT Integrated Waste Sorting System" width="1280" height="800" fetchpriority="high" decoding="async" />
                 <span class="mosaic-tag">PRJ-01 · SIPESAT</span>
               </span>
             </button>
 
-            <button type="button" class="mosaic-tile tile-b radius-md" data-parallax-depth="-0.75" data-jump-view="experience" data-jump-id="exp-sig" style="--tile-i:1" aria-label="PT Semen Indonesia Internship">
+            <button type="button" class="mosaic-tile tile-b radius-md" data-tone="amber" data-parallax-depth="-0.75" data-jump-view="experience" data-jump-id="exp-sig" style="--tile-i:1" aria-label="PT Semen Indonesia Internship">
               <span class="mosaic-parallax">
-                <img src="images/experience/Instrumentation%20Maintenance%20Intern/Semen1.JPG" alt="PT Semen Indonesia Instrumentation Maintenance" />
+                <img src="images/experience/Instrumentation%20Maintenance%20Intern/Semen1.JPG" alt="PT Semen Indonesia Instrumentation Maintenance" width="960" height="720" decoding="async" />
                 <span class="mosaic-tag">EXP-01 · SIG TUBAN</span>
               </span>
             </button>
 
-            <button type="button" class="mosaic-tile tile-c radius-lg" data-parallax-depth="0.95" data-jump-view="projects" data-jump-id="prj-sumo" style="--tile-i:2" aria-label="Autonomous Sumo Robot Navigation System">
+            <button type="button" class="mosaic-tile tile-c radius-lg" data-tone="cobalt" data-parallax-depth="0.95" data-jump-view="projects" data-jump-id="prj-sumo" style="--tile-i:2" aria-label="Autonomous Sumo Robot Navigation System">
               <span class="mosaic-parallax">
-                <img src="images/projects/Autonomous%20Sumo%20Robot%20Navigation%20System/sumo.jpg" alt="Autonomous Sumo Robot Navigation System" />
+                <img src="images/projects/Autonomous%20Sumo%20Robot%20Navigation%20System/sumo.jpg" alt="Autonomous Sumo Robot Navigation System" width="960" height="720" decoding="async" />
                 <span class="mosaic-tag">PRJ-03 · SUMO ROBOT</span>
               </span>
             </button>
 
-            <button type="button" class="mosaic-tile tile-d radius-md" data-parallax-depth="-0.45" data-jump-view="projects" data-jump-id="prj-iot-power" style="--tile-i:3" aria-label="IoT Power Intensity Control and Energy Monitoring with KNN">
+            <button type="button" class="mosaic-tile tile-d radius-md" data-tone="teal" data-parallax-depth="-0.45" data-jump-view="projects" data-jump-id="prj-iot-power" style="--tile-i:3" aria-label="IoT Power Intensity Control and Energy Monitoring with KNN">
               <span class="mosaic-parallax">
-                <img src="images/projects/IoT%20Power%20Intensity%20Control%20%26%20Energy%20Monitoring%20with%20KNN/iot1.jpg" alt="IoT Power Monitoring with KNN" />
+                <img src="images/projects/IoT%20Power%20Intensity%20Control%20%26%20Energy%20Monitoring%20with%20KNN/iot1.jpg" alt="IoT Power Monitoring with KNN" width="960" height="600" decoding="async" />
                 <span class="mosaic-tag">PRJ-02 · IOT KNN</span>
               </span>
             </button>
 
-            <button type="button" class="mosaic-tile tile-e radius-md" data-parallax-depth="0.65" data-jump-view="projects" data-jump-id="prj-agv" style="--tile-i:4" aria-label="AGV Blind Spot Detection System">
+            <button type="button" class="mosaic-tile tile-e radius-md" data-tone="sky" data-parallax-depth="0.65" data-jump-view="projects" data-jump-id="prj-agv" style="--tile-i:4" aria-label="AGV Blind Spot Detection System">
               <span class="mosaic-parallax">
-                <img src="images/projects/AGV%20Blind%20Spot%20Detection%20System/ultrasonic1.jpg" alt="AGV Blind Spot Ultrasonic Phased Array" />
+                <img src="images/projects/AGV%20Blind%20Spot%20Detection%20System/ultrasonic1.jpg" alt="AGV Blind Spot Ultrasonic Phased Array" width="960" height="600" decoding="async" />
                 <span class="mosaic-tag">PRJ-04 · AGV ARRAY</span>
               </span>
             </button>
           </div>
 
-          <!-- Lower-Right Editorial Description + Prominent Charcoal Ink Action Controls -->
-          <div class="hero-lower-right stagger-item" style="--stagger-i:1">
-            <p class="hero-bio" data-i18n-html="home.bio.html">
+          <!-- Lower-Right Editorial Description + Prominent Action Controls -->
+          <div class="hero-lower-right">
+            <p class="hero-bio hero-enter-item" style="--hero-i:0" data-i18n-html="home.bio.html">
               I am <strong>Bustan Nabiel Maulana</strong>, a final-year Electrical Engineering student at
               <strong>Telkom University</strong> specializing in industrial automation, field instrumentation, embedded
               systems, robotics, and edge AI. Experienced in load cell calibration and PLC/HMI/SCADA field maintenance
@@ -234,13 +238,13 @@
             </p>
 
             <div class="hero-actions">
-              <a href="#projects" data-nav-view="projects" class="btn btn-primary btn-lift">
+              <a href="#projects" data-nav-view="projects" class="btn btn-primary btn-lift hero-enter-item" style="--hero-i:1">
                 <span data-i18n="home.cta.projects">Explore Projects</span>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
               </a>
-              <a href="#experience" data-nav-view="experience" class="btn btn-secondary" data-i18n="home.cta.experience">Experience Deck</a>
-              <a href="#contact" data-nav-view="contact" class="btn btn-secondary" data-i18n="home.cta.contact">Contact</a>
-              <button type="button" class="btn btn-bare" data-open-cv data-i18n="home.cta.cv">CV Summary</button>
+              <a href="#experience" data-nav-view="experience" class="btn btn-secondary hero-enter-item" style="--hero-i:2" data-i18n="home.cta.experience">Experience Deck</a>
+              <a href="#contact" data-nav-view="contact" class="btn btn-secondary hero-enter-item" style="--hero-i:3" data-i18n="home.cta.contact">Contact</a>
+              <button type="button" class="btn btn-bare hero-enter-item" style="--hero-i:4" data-open-cv data-i18n="home.cta.cv">CV Summary</button>
             </div>
           </div>
         </div>
@@ -249,10 +253,10 @@
         <div class="home-split home-subblock">
           <!-- Left Sticky Column: Engineer Profile Card -->
           <aside class="dossier-col" aria-label="Engineer Profile Dossier">
-            <div class="dossier-card stagger-item scroll-reveal" style="--stagger-i:2; --reveal-i:0">
+            <div class="dossier-card interactive-card stagger-item scroll-reveal" data-tone="cobalt" style="--stagger-i:2; --reveal-i:0">
               <div class="dossier-head">
                 <div class="portrait-box parallax-frame" data-scroll-parallax="0.12">
-                  <img src="images/profile/foto_profil.jpg" alt="Portrait of Bustan Nabiel Maulana" />
+                  <img src="images/profile/foto_profil.jpg" alt="Portrait of Bustan Nabiel Maulana" width="184" height="184" loading="lazy" decoding="async" />
                 </div>
                 <div class="dossier-identity">
                   <h2>Bustan Nabiel Maulana</h2>
@@ -307,19 +311,19 @@
           <div class="home-main-col">
             <div class="stagger-item scroll-reveal" style="--stagger-i:2; --reveal-i:1">
               <div class="kpi-strip" aria-label="Portfolio Metrics">
-                <a href="#experience" data-nav-view="experience" class="kpi-cell">
+                <a href="#experience" data-nav-view="experience" class="kpi-cell interactive-card" data-tone="cobalt">
                   <span class="kpi-num">05</span>
                   <span class="kpi-label" data-i18n="home.kpi.exp">Field &amp; Lab Roles</span>
                 </a>
-                <a href="#projects" data-nav-view="projects" class="kpi-cell">
+                <a href="#projects" data-nav-view="projects" class="kpi-cell interactive-card" data-tone="teal">
                   <span class="kpi-num">04</span>
                   <span class="kpi-label" data-i18n="home.kpi.prj">Hardware/AI Builds</span>
                 </a>
-                <a href="#certificates" data-nav-view="certificates" class="kpi-cell">
+                <a href="#certificates" data-nav-view="certificates" class="kpi-cell interactive-card" data-tone="sky">
                   <span class="kpi-num">13</span>
                   <span class="kpi-label" data-i18n="home.kpi.cert">Verified Credentials</span>
                 </a>
-                <a href="#experience" data-jump-view="experience" data-jump-id="exp-sig" class="kpi-cell">
+                <a href="#experience" data-jump-view="experience" data-jump-id="exp-sig" class="kpi-cell interactive-card" data-tone="amber">
                   <span class="kpi-num">SIG</span>
                   <span class="kpi-label" data-i18n="home.kpi.sig">ELINS KC 3-4 Intern</span>
                 </a>
@@ -333,7 +337,7 @@
               </div>
 
               <div class="pillars-grid dark-feature-panel">
-                <div class="pillar-card">
+                <div class="pillar-card interactive-card" data-tone="amber">
                   <div>
                     <div class="pillar-head">
                       <span class="eyebrow eyebrow-inverse" data-i18n="pillars.c1.eyebrow">01 · Industrial</span>
@@ -351,7 +355,7 @@
                   </div>
                 </div>
 
-                <div class="pillar-card">
+                <div class="pillar-card interactive-card" data-tone="teal">
                   <div>
                     <div class="pillar-head">
                       <span class="eyebrow eyebrow-inverse" data-i18n="pillars.c2.eyebrow">02 · Embedded</span>
@@ -369,7 +373,7 @@
                   </div>
                 </div>
 
-                <div class="pillar-card">
+                <div class="pillar-card interactive-card" data-tone="sky">
                   <div>
                     <div class="pillar-head">
                       <span class="eyebrow eyebrow-inverse" data-i18n="pillars.c3.eyebrow">03 · Applied AI</span>
@@ -398,9 +402,9 @@
           </div>
 
           <div class="highlights-grid">
-            <button type="button" class="highlight-card black-showcase-card scroll-reveal" style="--reveal-i:0" data-jump-view="experience" data-jump-id="exp-sig">
+            <button type="button" class="highlight-card black-showcase-card interactive-card scroll-reveal" data-tone="amber" style="--reveal-i:0" data-jump-view="experience" data-jump-id="exp-sig">
               <div class="highlight-thumb parallax-frame" data-scroll-parallax="0.18">
-                <img src="images/experience/Instrumentation%20Maintenance%20Intern/Semen1.JPG" alt="PT Semen Indonesia Internship" loading="lazy" />
+                <img src="images/experience/Instrumentation%20Maintenance%20Intern/Semen1.JPG" alt="PT Semen Indonesia Internship" width="800" height="500" loading="lazy" decoding="async" />
               </div>
               <div class="highlight-body">
                 <span class="eyebrow eyebrow-inverse" data-i18n="highlights.h1.eyebrow">EXPERIENCE · SIG</span>
@@ -409,9 +413,9 @@
               </div>
             </button>
 
-            <button type="button" class="highlight-card black-showcase-card scroll-reveal" style="--reveal-i:1" data-jump-view="projects" data-jump-id="prj-sipesat">
+            <button type="button" class="highlight-card black-showcase-card interactive-card scroll-reveal" data-tone="teal" style="--reveal-i:1" data-jump-view="projects" data-jump-id="prj-sipesat">
               <div class="highlight-thumb parallax-frame" data-scroll-parallax="0.22">
-                <img src="images/projects/SIPESAT%20%E2%80%93%20Sistem%20Pemilah%20Sampah%20Terpadu/IMG_20261120_103621.jpg" alt="SIPESAT Waste Sorting System" loading="lazy" />
+                <img src="images/projects/SIPESAT%20%E2%80%93%20Sistem%20Pemilah%20Sampah%20Terpadu/IMG_20261120_103621.jpg" alt="SIPESAT Waste Sorting System" width="800" height="500" loading="lazy" decoding="async" />
               </div>
               <div class="highlight-body">
                 <span class="eyebrow eyebrow-inverse" data-i18n="highlights.h2.eyebrow">PROJECT · PRJ-01</span>
@@ -420,9 +424,9 @@
               </div>
             </button>
 
-            <button type="button" class="highlight-card black-showcase-card scroll-reveal" style="--reveal-i:2" data-jump-view="projects" data-jump-id="prj-sumo">
+            <button type="button" class="highlight-card black-showcase-card interactive-card scroll-reveal" data-tone="cobalt" style="--reveal-i:2" data-jump-view="projects" data-jump-id="prj-sumo">
               <div class="highlight-thumb parallax-frame" data-scroll-parallax="0.18">
-                <img src="images/projects/Autonomous%20Sumo%20Robot%20Navigation%20System/sumo.jpg" alt="Autonomous Sumo Robot" loading="lazy" />
+                <img src="images/projects/Autonomous%20Sumo%20Robot%20Navigation%20System/sumo.jpg" alt="Autonomous Sumo Robot" width="800" height="500" loading="lazy" decoding="async" />
               </div>
               <div class="highlight-body">
                 <span class="eyebrow eyebrow-inverse" data-i18n="highlights.h3.eyebrow">PROJECT · PRJ-03</span>
@@ -431,9 +435,9 @@
               </div>
             </button>
 
-            <button type="button" class="highlight-card black-showcase-card scroll-reveal" style="--reveal-i:3" data-jump-view="certificates">
+            <button type="button" class="highlight-card black-showcase-card interactive-card scroll-reveal" data-tone="sky" style="--reveal-i:3" data-jump-view="certificates">
               <div class="highlight-thumb contain-img">
-                <img src="images/certificates/oracle_ai_foundations.png" alt="Oracle OCI 2025 Certified AI Foundations Associate" loading="lazy" />
+                <img src="images/certificates/oracle_ai_foundations.png" alt="Oracle OCI 2025 Certified AI Foundations Associate" width="800" height="500" loading="lazy" decoding="async" />
               </div>
               <div class="highlight-body">
                 <span class="eyebrow eyebrow-inverse" data-i18n="highlights.h4.eyebrow">CERTIFICATES · 13</span>
@@ -460,6 +464,7 @@
             </div>
 
             <div class="filter-bar" role="group" aria-label="Filter experience by track">
+              <span class="filter-glider" aria-hidden="true"></span>
               <button type="button" class="filter-btn active" data-exp-filter="all" data-i18n="exp.filter.all">All (5)</button>
               <button type="button" class="filter-btn" data-exp-filter="industrial" data-i18n="exp.filter.industrial">Industrial (1)</button>
               <button type="button" class="filter-btn" data-exp-filter="lab" data-i18n="exp.filter.lab">Laboratories (3)</button>
@@ -489,6 +494,7 @@
             </div>
 
             <div class="filter-bar" role="group" aria-label="Filter projects by category">
+              <span class="filter-glider" aria-hidden="true"></span>
               <button type="button" class="filter-btn active" data-prj-filter="all" data-i18n="prj.filter.all">All Projects (4)</button>
               <button type="button" class="filter-btn" data-prj-filter="iot" data-i18n="prj.filter.iot">IoT &amp; Vision (2)</button>
               <button type="button" class="filter-btn" data-prj-filter="robotics" data-i18n="prj.filter.robotics">Robotics &amp; Safety (2)</button>
@@ -522,6 +528,7 @@
             </div>
 
             <div class="filter-bar" role="group" aria-label="Filter certificates by category">
+              <span class="filter-glider" aria-hidden="true"></span>
               <button type="button" class="filter-btn active" data-cert-filter="all" data-i18n="cert.filter.all">All (13)</button>
               <button type="button" class="filter-btn" data-cert-filter="ai" data-i18n="cert.filter.ai">AI &amp; Cloud (3)</button>
               <button type="button" class="filter-btn" data-cert-filter="iot" data-i18n="cert.filter.iot">IoT &amp; Code (5)</button>
@@ -550,7 +557,7 @@
         <div class="contact-layout stagger-item" style="--stagger-i:1">
           <div class="contact-cards-grid">
             <!-- Email -->
-            <div class="contact-card interactive-card scroll-reveal" style="--reveal-i:0">
+            <div class="contact-card interactive-card scroll-reveal" data-tone="cobalt" style="--reveal-i:0">
               <div class="contact-card-top">
                 <div>
                   <span class="contact-channel-name">Email</span>
@@ -577,7 +584,7 @@
             </div>
 
             <!-- LinkedIn -->
-            <div class="contact-card interactive-card scroll-reveal" style="--reveal-i:1">
+            <div class="contact-card interactive-card scroll-reveal" data-tone="sky" style="--reveal-i:1">
               <div class="contact-card-top">
                 <div>
                   <span class="contact-channel-name">LinkedIn</span>
@@ -599,7 +606,7 @@
             </div>
 
             <!-- GitHub -->
-            <div class="contact-card interactive-card scroll-reveal" style="--reveal-i:2">
+            <div class="contact-card interactive-card scroll-reveal" data-tone="amber" style="--reveal-i:2">
               <div class="contact-card-top">
                 <div>
                   <span class="contact-channel-name">GitHub</span>
@@ -621,7 +628,7 @@
             </div>
 
             <!-- WhatsApp -->
-            <div class="contact-card interactive-card scroll-reveal" style="--reveal-i:3">
+            <div class="contact-card interactive-card scroll-reveal" data-tone="teal" style="--reveal-i:3">
               <div class="contact-card-top">
                 <div>
                   <span class="contact-channel-name">WhatsApp</span>
@@ -644,7 +651,7 @@
           </div>
 
           <!-- Availability & Dossier Panel -->
-          <aside class="availability-panel interactive-card scroll-reveal" style="--reveal-i:4" aria-label="Availability Details">
+          <aside class="availability-panel interactive-card scroll-reveal" data-tone="teal" style="--reveal-i:4" aria-label="Availability Details">
             <h3 data-i18n="contact.avail.title">Location &amp; Role Readiness</h3>
             <p data-i18n-html="contact.avail.desc.html">
               Based in <strong>Bandung &amp; Tuban, Indonesia</strong> (UTC+7 / WIB). Open to graduate engineering roles,
@@ -741,7 +748,7 @@
           <button type="button" id="lb-prev" class="stage-arrow prev" aria-label="Previous item">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg>
           </button>
-          <img id="lb-img" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1' height='1'/%3E" alt="" />
+          <img id="lb-img" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1' height='1'/%3E" alt="" width="1200" height="800" loading="lazy" decoding="async" />
           <button type="button" id="lb-next" class="stage-arrow next" aria-label="Next item">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
           </button>
